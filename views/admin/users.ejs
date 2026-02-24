@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-nav {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .admin-nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+
+        .admin-nav a:hover {
+            text-decoration: underline;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--primary-color);
+            background: white;
+            color: var(--primary-color);
+            border-radius: var(--radius);
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table th {
+            background: var(--background-color);
+            font-weight: 600;
+        }
+
+        .role-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .role-customer {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .role-host {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .role-admin {
+            background: #fce7f3;
+            color: #9f1239;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="admin-nav">
+        <div class="container">
+            <div>
+                <strong>Admin Panel</strong>
+            </div>
+            <div>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/users">Users</a>
+                <a href="/admin/bookings">Bookings</a>
+                <a href="/admin/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>User Management</h1>
+
+        <div class="filter-bar">
+            <a href="/admin/users" class="filter-btn <%= selectedRole==='all' ? 'active' : '' %>">All Users</a>
+            <a href="/admin/users?role=customer"
+                class="filter-btn <%= selectedRole==='customer' ? 'active' : '' %>">Customers</a>
+            <a href="/admin/users?role=host" class="filter-btn <%= selectedRole==='host' ? 'active' : '' %>">Hosts</a>
+            <a href="/admin/users?role=admin"
+                class="filter-btn <%= selectedRole==='admin' ? 'active' : '' %>">Admins</a>
+        </div>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Joined</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% users.forEach(user=> { %>
+                        <tr>
+                            <td>
+                                <%= user._id.toString().slice(-6) %>
+                            </td>
+                            <td>
+                                <%= user.name %>
+                            </td>
+                            <td>
+                                <%= user.email %>
+                            </td>
+                            <td>
+                                <span class="role-badge role-<%= user.role %>">
+                                    <%= user.role %>
+                                </span>
+                            </td>
+                            <td>
+                                <%= user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A' %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

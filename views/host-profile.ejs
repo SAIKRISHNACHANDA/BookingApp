@@ -1,0 +1,552 @@
+<%- include('partials/header') %>
+
+    <style>
+        .host-profile-header {
+            text-align: center;
+            padding: 3rem 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .host-profile-header h1 {
+            font-size: 2.25rem;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+        }
+
+        .host-profile-header p {
+            color: #64748b;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .calendar-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            padding: 3rem;
+            max-width: 1000px;
+            margin: 0 auto 5rem;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            border: 1px solid #f1f5f9;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .calendar-header h2 {
+            font-size: 1.25rem;
+            color: #0f172a;
+            font-weight: 600;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #64748b;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 50%;
+        }
+
+        .nav-btn:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.25rem;
+            text-align: center;
+        }
+
+        .weekday {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            padding-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #334155;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            margin: 2px;
+            background: #ffffff;
+            border: 1px solid transparent;
+        }
+
+        .day.empty {
+            cursor: default;
+        }
+
+        .day.available {
+            background-color: #eff6ff !important;
+            color: #1e3a8a !important;
+            font-weight: 700;
+            border: 1px solid #bfdbfe !important;
+        }
+
+        .day.available::after {
+            content: '';
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            background-color: #3b82f6;
+            border-radius: 50%;
+        }
+
+        .day.today {
+            border: 2px solid #64748b;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .day.selected {
+            background-color: #2563eb !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            transform: scale(1.05);
+            z-index: 10;
+            border-color: #2563eb !important;
+        }
+
+        .day.selected::after {
+            background-color: white !important;
+        }
+
+        .day:hover:not(.empty):not(.disabled):not(.selected) {
+            background-color: #f8fafc;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+            z-index: 5;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Custom Tooltip */
+        .day[data-slots]:hover::before {
+            content: attr(data-slots) ' slots available';
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1e293b;
+            color: #fff;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0;
+            animation: tooltip-fade 0.2s ease-out forwards;
+        }
+
+        @keyframes tooltip-fade {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(5px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .day.disabled {
+            opacity: 1;
+            /* Fully visible */
+            color: #94a3b8;
+            /* Slate 400 - Visible gray */
+            background: #ffffff;
+            cursor: default;
+            border: 1px solid transparent;
+        }
+
+        .time-slots {
+            padding-left: 3rem;
+            border-left: 1px solid #f1f5f9;
+        }
+
+        .slots-header {
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: #0f172a;
+            font-size: 1.25rem;
+        }
+
+        .slot-btn {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid #2563eb;
+            background: white;
+            color: #2563eb;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .slot-btn:hover {
+            background: #2563eb;
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+
+        .timezone-footer {
+            margin-top: 3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #475569;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .globe-icon {
+            color: #1e293b;
+            font-size: 1.25rem;
+        }
+
+        .calendar-layout {
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2rem;
+        }
+
+        .calendar-left {
+            padding-right: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .host-profile-header {
+                padding: 2rem 1rem;
+            }
+
+            .host-profile-header h1 {
+                font-size: 1.75rem;
+            }
+
+            .calendar-card {
+                padding: 1rem;
+                margin-bottom: 3rem;
+            }
+
+            .calendar-layout {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .calendar-left {
+                padding-right: 0;
+            }
+
+            .calendar-header {
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .calendar-header h2 {
+                font-size: 1rem;
+                min-width: auto;
+            }
+
+            .day {
+                border-radius: 8px;
+                font-size: 0.9rem;
+            }
+
+            .weekday {
+                font-size: 0.7rem;
+                padding-bottom: 1rem;
+            }
+
+            .time-slots {
+                padding-left: 0;
+                border-left: none;
+                border-top: 1px solid #f1f5f9;
+                margin-top: 2rem;
+                padding-top: 2rem;
+            }
+
+            #bookingSummary {
+                width: calc(100% - 2rem) !important;
+                right: 1rem !important;
+                bottom: 1rem !important;
+                left: 1rem !important;
+            }
+        }
+    </style>
+
+    <div class="container">
+        <div class="host-profile-header">
+            <h1>
+                <%= host.name %>
+            </h1>
+            <p>
+                <%= host.bio || 'Book a 1:1 session for expert guidance and mentorship.' %>
+            </p>
+        </div>
+
+        <div class="calendar-card">
+            <div class="grid calendar-layout">
+                <!-- Left side: Calendar -->
+                <div class="calendar-left">
+                    <h2 style="margin-bottom: 2rem; font-size: 1.5rem; color: #0f172a; font-weight: 700;">Select a Date
+                        & Time</h2>
+
+                    <div class="calendar-header">
+                        <button class="nav-btn" onclick="prevMonth()">❮</button>
+                        <h2 id="monthDisplay">February 2026</h2>
+                        <button class="nav-btn" onclick="nextMonth()">❯</button>
+                    </div>
+
+                    <div class="calendar-grid" id="calendarGrid">
+                        <div class="weekday">MON</div>
+                        <div class="weekday">TUE</div>
+                        <div class="weekday">WED</div>
+                        <div class="weekday">THU</div>
+                        <div class="weekday">FRI</div>
+                        <div class="weekday">SAT</div>
+                        <div class="weekday">SUN</div>
+                        <!-- Days will be injected here -->
+                    </div>
+
+                    <div class="timezone-footer">
+                        <span class="globe-icon">🌐</span>
+                        <strong>Time zone:</strong>
+                        <span id="timezoneText">India Standard Time (4:46pm)</span> ▾
+                    </div>
+                </div>
+
+                <!-- Right side: Slots -->
+                <div id="slotsContainer" class="time-slots">
+                    <div id="selectedDateLabel" class="slots-header">Available Slots</div>
+                    <div id="slotsList">
+                        <p class="text-light">Select a date to view available times.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Summary -->
+        <div id="bookingSummary"
+            style="display: none; position: fixed; bottom: 2rem; right: 2rem; width: 340px; z-index: 100;" class="card">
+            <!-- Content injected here -->
+        </div>
+    </div>
+
+    <script>
+        // Use Data Attributes to pass EJS data safely to JS without linting issues
+        const HOST_DATA = {
+            id: '<%= host._id %>',
+            username: '<%= host.username %>',
+            rate: parseFloat('<%= host.hourlyRate || 0 %>'),
+            currency: '<%= host.currency || "INR" %>'
+        };
+
+        let currentMonth = new Date();
+        let selectedDate = new Date();
+        let selectedSlot = null;
+        let MONTH_AVAILABILITY = {};
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            await fetchMonthAvailability(currentMonth.getFullYear(), currentMonth.getMonth());
+            renderCalendar();
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase().replace(' ', '');
+            document.getElementById('timezoneText').innerText = `${tz} (${time})`;
+        });
+
+        async function fetchMonthAvailability(year, month) {
+            try {
+                // console.log(`[fetchMonthAvailability] Fetching for ${year}-${month + 1}`);
+                const response = await fetch(`/hosts/api/hosts/${HOST_DATA.username}/month-availability?year=${year}&month=${month}`);
+                if (!response.ok) throw new Error('Failed to fetch availability');
+                MONTH_AVAILABILITY = await response.json();
+                // console.log('[fetchMonthAvailability] Data:', MONTH_AVAILABILITY);
+            } catch (err) {
+                console.error('Error fetching availability:', err);
+                MONTH_AVAILABILITY = {};
+            }
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthDisplay = document.getElementById('monthDisplay');
+
+            // Clear previous days
+            const dayElements = grid.querySelectorAll('.day');
+            dayElements.forEach(el => el.remove());
+
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+
+            monthDisplay.innerText = new Date(year, month).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Handle Monday start
+            let startDay = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+
+            for (let i = 0; i < startDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'day empty';
+                grid.appendChild(empty);
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDate = new Date(year, month, i);
+                const dayEl = document.createElement('div');
+                dayEl.className = 'day';
+                dayEl.innerText = i;
+
+                const dateLocal = dayDate.getFullYear() + '-' + String(dayDate.getMonth() + 1).padStart(2, '0') + '-' + String(dayDate.getDate()).padStart(2, '0');
+                const dayOfWeek = dayDate.getDay();
+
+                // Today's style
+                if (dayDate.getTime() === today.getTime()) {
+                    dayEl.classList.add('today');
+                }
+
+                // Selected day style
+                if (dayDate.getTime() === selectedDate.getTime()) {
+                    dayEl.classList.add('selected');
+                }
+
+                // Availability coloring logic
+                const availability = MONTH_AVAILABILITY[dateLocal];
+
+                if (dayDate >= today) {
+                    if (availability && availability.isAvailable) {
+                        dayEl.classList.add('available');
+                        dayEl.classList.add('has-slots-dot'); // Dot is handled by CSS
+                        dayEl.setAttribute('data-slots', availability.count);
+                        dayEl.title = `${availability.count} slots available`;
+                        dayEl.onclick = () => selectDate(dayDate, dayEl);
+                    } else {
+                        dayEl.classList.add('disabled');
+                    }
+                } else {
+                    dayEl.classList.add('disabled');
+                }
+
+                grid.appendChild(dayEl);
+            }
+        }
+
+        async function prevMonth() {
+            currentMonth.setMonth(currentMonth.getMonth() - 1);
+            await fetchMonthAvailability(currentMonth.getFullYear(), currentMonth.getMonth());
+            renderCalendar();
+        }
+
+        async function nextMonth() {
+            currentMonth.setMonth(currentMonth.getMonth() + 1);
+            await fetchMonthAvailability(currentMonth.getFullYear(), currentMonth.getMonth());
+            renderCalendar();
+        }
+
+        async function selectDate(date, element) {
+            document.querySelectorAll('.day').forEach(d => d.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedDate = date;
+
+            const dateString = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+            const displayDate = date.toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric' });
+            document.getElementById('selectedDateLabel').innerText = displayDate;
+
+            const slotsList = document.getElementById('slotsList');
+            slotsList.innerHTML = '<p class="loading">Finding available times...</p>';
+
+            try {
+                const response = await fetch(`/hosts/api/hosts/${HOST_DATA.username}/availability?date=${dateString}`);
+                const data = await response.json();
+
+                if (data.slots && data.slots.length > 0) {
+                    slotsList.innerHTML = '';
+                    data.slots.forEach(slot => {
+                        const btn = document.createElement('button');
+                        btn.className = 'slot-btn';
+                        btn.innerText = slot.startTime;
+                        btn.onclick = () => showFinalSelection(slot, displayDate);
+                        slotsList.appendChild(btn);
+                    });
+                } else {
+                    slotsList.innerHTML = '<p class="text-light">No slots available for this date.</p>';
+                }
+            } catch (err) {
+                slotsList.innerHTML = '<p class="text-light">Failed to load slots.</p>';
+            }
+        }
+
+        function showFinalSelection(slot, dateLabel) {
+            selectedSlot = slot;
+            const summary = document.getElementById('bookingSummary');
+
+            const start = new Date(slot.start);
+            const end = new Date(slot.end);
+            const durationMinutes = (end - start) / 60000;
+            const price = (HOST_DATA.rate / 60) * durationMinutes;
+
+            summary.style.display = 'block';
+            summary.innerHTML = `
+                <div style="padding: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                        <h3 style="font-size: 1.1rem; color: #0f172a;">Confirm Booking</h3>
+                        <button onclick="document.getElementById('bookingSummary').style.display='none'" style="background: none; border: none; cursor: pointer; color: #64748b; font-size: 1.25rem;">&times;</button>
+                    </div>
+                    <div style="margin-bottom: 1.5rem; font-size: 0.95rem; color: #475569;">
+                        <div style="margin-bottom: 0.25rem;"><strong>${dateLabel}</strong></div>
+                        <div style="margin-bottom: 0.25rem;">${slot.startTime} - ${slot.endTime}</div>
+                        <div>${durationMinutes} minutes • ${HOST_DATA.currency} ${price.toFixed(2)}</div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; border-radius: 8px; padding: 0.85rem;" onclick="proceedToCheckout()">Confirm Booking</button>
+                </div>
+            `;
+        }
+
+        function proceedToCheckout() {
+            if (!selectedSlot) return;
+            const params = new URLSearchParams({
+                hostId: HOST_DATA.id,
+                startTime: selectedSlot.start,
+                endTime: selectedSlot.end
+            });
+            window.location.href = `/bookings/checkout?${params.toString()}`;
+        }
+    </script>
+
+    <%- include('partials/footer') %>

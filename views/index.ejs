@@ -1,0 +1,639 @@
+<%- include('partials/header') %>
+
+    <!-- Ultra Premium Hero Section (Dark Theme) -->
+    <section class="hero-section">
+        <style>
+            .hero-section {
+                position: relative;
+                padding: 5rem 2rem 4rem;
+                background-color: #0b1120;
+                overflow: hidden;
+                text-align: center;
+                color: white;
+                border-radius: 16px;
+                margin: 0.75rem 0 2rem;
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            }
+
+            /* Subtle Grid Background */
+            .hero-bg-grid {
+                position: absolute;
+                inset: 0;
+                background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+                background-size: 40px 40px;
+                mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+                z-index: 0;
+                pointer-events: none;
+            }
+
+            /* Glow Effects */
+            .hero-glow {
+                position: absolute;
+                width: 600px;
+                height: 600px;
+                background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, transparent 70%);
+                top: -100px;
+                left: 50%;
+                transform: translateX(-50%);
+                filter: blur(80px);
+                z-index: 0;
+                pointer-events: none;
+            }
+
+            .hero-content {
+                position: relative;
+                z-index: 10;
+                max-width: 900px;
+                margin: 0 auto;
+            }
+
+            .badge-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1.25rem;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 100px;
+                font-size: 0.85rem;
+                font-weight: 500;
+                color: #e2e8f0;
+                margin-bottom: 2rem;
+                backdrop-filter: blur(10px);
+            }
+
+            .badge-dot {
+                width: 6px;
+                height: 6px;
+                background-color: #4ade80;
+                border-radius: 50%;
+                box-shadow: 0 0 8px #4ade80;
+            }
+
+            .hero-title {
+                font-size: 3.5rem;
+                /* Fallback */
+                font-size: clamp(3rem, 6vw, 4.5rem);
+                font-weight: 800;
+                line-height: 1.1;
+                margin-bottom: 1.5rem;
+                letter-spacing: -0.02em;
+                background: linear-gradient(to bottom right, #ffffff 40%, #94a3b8 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+
+            .hero-subtitle {
+                font-size: 1.25rem;
+                color: #94a3b8;
+                max-width: 650px;
+                margin: 0 auto 3.5rem;
+                line-height: 1.7;
+            }
+
+            .premium-search-box {
+                max-width: 600px;
+                margin: 0 auto;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 0.5rem;
+                border-radius: 24px;
+                display: flex;
+                align-items: center;
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+            }
+
+            .premium-search-box:focus-within {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(79, 70, 229, 0.5);
+                box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+                transform: translateY(-2px);
+            }
+
+            .search-input {
+                flex-grow: 1;
+                background: transparent;
+                border: none;
+                padding: 1rem 1.5rem;
+                color: white;
+                font-size: 1.05rem;
+                outline: none;
+            }
+
+            .search-input::placeholder {
+                color: #64748b;
+            }
+
+            .search-btn {
+                background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+                color: white;
+                border: none;
+                padding: 1rem 2rem;
+                border-radius: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+                white-space: nowrap;
+            }
+
+            .search-btn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+            }
+        </style>
+
+        <div class="hero-bg-grid"></div>
+        <div class="hero-glow"></div>
+
+        <div class="hero-content">
+            <div class="badge-pill">
+                <span class="badge-dot"></span>
+                <span>The #1 Booking Platform for Experts</span>
+            </div>
+
+            <h1 class="hero-title">
+                Master your craft with<br>world-class mentors
+            </h1>
+
+            <p class="hero-subtitle">
+                Stop wasting time on scheduling emails. Connect directly with industry leaders, coaches, and consultants
+                via seamless 1:1 video sessions.
+            </p>
+
+            <div class="premium-search-box">
+                <input type="text" class="search-input" placeholder="Try 'Product Design' or 'Leadership'...">
+                <button class="search-btn">Find Expert</button>
+            </div>
+        </div>
+    </section>
+
+    <div class="container fade-in" style="max-width: 1400px; margin-bottom: 4rem;">
+        <div class="flex justify-between items-end mb-2" style="padding: 0 1rem;">
+            <div>
+                <h2 style="font-size: 2.25rem; font-weight: 800; color: #0f172a; margin-bottom: 0.5rem;">Featured
+                    Experts</h2>
+                <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 2rem;">Top-rated mentors available for
+                    booking today.</p>
+            </div>
+            <!-- <a href="/experts" style="color: var(--primary-color); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; transition: gap 0.2s;" onmouseover="this.style.gap='0.75rem'">View All Experts <span>→</span></a> -->
+        </div>
+
+        <div class="grid grid-3" style="gap: 2.5rem;">
+            <% if (hosts && hosts.length> 0) { %>
+                <% hosts.forEach(host=> { %>
+                    <div class="expert-card">
+                        <style>
+                            .expert-card {
+                                background: white;
+                                border-radius: 32px;
+                                padding: 0;
+                                position: relative;
+                                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                                border: 1px solid rgba(241, 245, 249, 1);
+                                display: flex;
+                                flex-direction: column;
+                            }
+
+                            .expert-card:hover {
+                                transform: translateY(-8px);
+                                box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
+                                border-color: rgba(79, 70, 229, 0.2);
+                            }
+
+                            .card-header-bg {
+                                height: 100px;
+                                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                                border-radius: 32px 32px 0 0;
+                                position: relative;
+                                overflow: hidden;
+                            }
+
+                            .card-header-bg::before {
+                                content: '';
+                                position: absolute;
+                                top: 0;
+                                left: 0;
+                                width: 100%;
+                                height: 100%;
+                                background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.1), transparent 60%);
+                            }
+
+                            .expert-avatar-container {
+                                margin-top: -60px;
+                                display: flex;
+                                justify-content: center;
+                                position: relative;
+                            }
+
+                            .expert-avatar {
+                                height: 120px;
+                                width: 120px;
+                                border-radius: 50%;
+                                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+                                color: var(--primary-color);
+                                font-size: 2.5rem;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                border: 6px solid white;
+                                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+                                font-weight: 700;
+                                position: relative;
+                                z-index: 2;
+                            }
+
+                            .verified-badge {
+                                position: absolute;
+                                bottom: 5px;
+                                right: 5px;
+                                width: 24px;
+                                height: 24px;
+                                background: #2563eb;
+                                color: white;
+                                border-radius: 50%;
+                                border: 3px solid white;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 12px;
+                                z-index: 3;
+                            }
+
+                            .card-body {
+                                padding: 1.5rem 2rem 2rem;
+                                text-align: center;
+                                flex-grow: 1;
+                                display: flex;
+                                flex-direction: column;
+                            }
+
+                            .expert-name {
+                                font-size: 1.5rem;
+                                font-weight: 700;
+                                color: #0f172a;
+                                margin-bottom: 0.5rem;
+                            }
+
+                            .expert-role {
+                                font-size: 0.95rem;
+                                color: var(--primary-color);
+                                font-weight: 600;
+                                margin-bottom: 1rem;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
+                            }
+
+                            .expert-bio {
+                                color: #64748b;
+                                font-size: 0.95rem;
+                                line-height: 1.6;
+                                margin-bottom: 1.5rem;
+                                display: -webkit-box;
+                                -webkit-line-clamp: 3;
+                                -webkit-box-orient: vertical;
+                                overflow: hidden;
+                            }
+
+                            .card-footer {
+                                margin-top: auto;
+                                padding-top: 1.5rem;
+                                border-top: 1px solid #f1f5f9;
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: center;
+                            }
+
+                            .price-tag {
+                                text-align: left;
+                            }
+
+                            .price-label {
+                                font-size: 0.8rem;
+                                color: #94a3b8;
+                                display: block;
+                                margin-bottom: 0.25rem;
+                            }
+
+                            .price-value {
+                                font-weight: 800;
+                                color: #0f172a;
+                                font-size: 1.25rem;
+                            }
+
+                            .btn-book {
+                                background: var(--primary-color);
+                                color: white;
+                                padding: 0.75rem 1.5rem;
+                                border-radius: 12px;
+                                font-weight: 600;
+                                font-size: 0.95rem;
+                                transition: all 0.2s;
+                                box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+                            }
+
+                            .btn-book:hover {
+                                background: var(--primary-dark);
+                                transform: translateY(-1px);
+                                box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+                            }
+                        </style>
+
+                        <!-- Card Header Background -->
+                        <div class="card-header-bg"></div>
+
+                        <!-- Avatar -->
+                        <div class="expert-avatar-container">
+                            <div class="expert-avatar">
+                                <%= host.name.charAt(0).toUpperCase() %>
+                                    <div class="verified-badge">✓</div>
+                            </div>
+                        </div>
+
+                        <!-- Body -->
+                        <div class="card-body">
+                            <h3 class="expert-name">
+                                <%= host.name %>
+                            </h3>
+                            <div class="expert-role">Expert Mentor</div>
+                            <p class="expert-bio">
+                                <%= host.bio
+                                    || 'Experienced professional dedicated to helping you achieve your career goals through personalized mentorship.'
+                                    %>
+                            </p>
+
+                            <div class="card-footer">
+                                <div class="price-tag">
+                                    <span class="price-label">Session Price</span>
+                                    <span class="price-value">
+                                        <%= host.currency %>
+                                            <%= host.hourlyRate %>
+                                    </span>
+                                </div>
+                                <a href="/hosts/<%= host.username %>" class="btn-book">Book Now</a>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+                        <% } else { %>
+                            <div class="text-center"
+                                style="grid-column: 1/-1; padding: 6rem 2rem; background: #f8fafc; border-radius: 24px;">
+                                <div style="font-size: 4rem; margin-bottom: 1.5rem;">🌱</div>
+                                <h3 style="font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">
+                                    No experts found yet</h3>
+                                <p style="color: #64748b; margin-bottom: 2rem;">Be the first to join our platform and
+                                    share your expertise.</p>
+                                <a href="/signup" class="btn btn-primary"
+                                    style="padding: 1rem 2rem; font-size: 1.1rem;">Become a Host</a>
+                            </div>
+                            <% } %>
+        </div>
+    </div>
+
+    <!-- Ultra Premium Features Section (Bento Grid) -->
+    <section
+        style="background-color: #0b1120; padding: 3.5rem 2rem; color: white; border-radius: 16px; margin: 0 0 2rem; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
+        <div class="container" style="max-width: 1400px;">
+            <div class="text-center mb-5">
+                <style>
+                    .feature-title {
+                        font-size: 2.5rem;
+                        font-weight: 800;
+                        margin-bottom: 1rem;
+                        background: linear-gradient(to right, #fff, #94a3b8);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                    }
+
+                    .bento-grid {
+                        display: grid;
+                        grid-template-columns: repeat(3, 1fr);
+                        gap: 1.5rem;
+                    }
+
+                    .bento-card {
+                        background: rgba(255, 255, 255, 0.03);
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        border-radius: 32px;
+                        padding: 2rem;
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        text-align: left;
+                        position: relative;
+                        overflow: hidden;
+                    }
+
+                    .bento-card:hover {
+                        background: rgba(255, 255, 255, 0.06);
+                        transform: translateY(-5px);
+                        border-color: rgba(255, 255, 255, 0.2);
+                        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+                    }
+
+                    .bento-card.wide {
+                        grid-column: span 2;
+                    }
+
+                    .feature-icon {
+                        width: 48px;
+                        height: 48px;
+                        border-radius: 16px;
+                        background: linear-gradient(135deg, #4f46e5, #4338ca);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 1.5rem;
+                        margin-bottom: 1.5rem;
+                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                    }
+
+                    .bento-card h3 {
+                        font-size: 1.25rem;
+                        font-weight: 700;
+                        margin-bottom: 0.75rem;
+                        color: #f1f5f9;
+                    }
+
+                    .bento-card p {
+                        color: #94a3b8;
+                        line-height: 1.6;
+                        font-size: 0.95rem;
+                    }
+
+                    @media (max-width: 900px) {
+                        .bento-grid {
+                            grid-template-columns: 1fr;
+                        }
+
+                        .bento-card.wide {
+                            grid-column: auto;
+                        }
+                    }
+                </style>
+                <h2 class="feature-title">Why ExpertBook?</h2>
+                <p style="color: #94a3b8; font-size: 1.2rem; max-width: 600px; margin: 0 auto;">Build your skills with
+                    the best tools and mentors in the industry.</p>
+            </div>
+
+            <div class="bento-grid">
+                <!-- Card 1 -->
+                <div class="bento-card wide">
+                    <div class="feature-icon">⚡️</div>
+                    <h3>Instant Booking & Scheduling</h3>
+                    <p>No more back-and-forth emails. Our real-time calendar allows you to book sessions instantly
+                        around your schedule. Compatible with Google Calendar and Outlook.</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bento-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure Global Payments</h3>
+                    <p>Process payments in USD, INR, and 50+ other currencies with enterprise-grade security via
+                        Razorpay and PayU.</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bento-card">
+                    <div class="feature-icon">📹</div>
+                    <h3>HD Video & Conferencing</h3>
+                    <p>Crystal clear video calls directly in the browser. No downloads required. Powered by WebRTC for
+                        low latency.</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bento-card wide">
+                    <div class="feature-icon">🤝</div>
+                    <h3>Verified Expert Community</h3>
+                    <p>Every mentor is vetted for quality and expertise. Access a global network of professionals ready
+                        to help you grow your career.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section style="margin: 0 0 2rem;">
+        <style>
+            @keyframes cta-gradient {
+                0% {
+                    background-position: 0% 50%;
+                }
+
+                50% {
+                    background-position: 100% 50%;
+                }
+
+                100% {
+                    background-position: 0% 50%;
+                }
+            }
+
+            @keyframes cta-glow-pulse {
+
+                0%,
+                100% {
+                    opacity: 0.5;
+                    transform: scale(1);
+                }
+
+                50% {
+                    opacity: 0.8;
+                    transform: scale(1.1);
+                }
+            }
+
+            .cta-card {
+                position: relative;
+                background: linear-gradient(-45deg, #0a0718, #12093a, #080e2a, #150826);
+                background-size: 300% 300%;
+                animation: cta-gradient 12s ease infinite;
+                border-radius: 16px;
+                padding: 5.5rem 2rem;
+                text-align: center;
+                overflow: hidden;
+            }
+
+            .cta-glow {
+                position: absolute;
+                width: 600px;
+                height: 400px;
+                background: radial-gradient(ellipse, rgba(99, 75, 230, 0.3) 0%, transparent 70%);
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+                animation: cta-glow-pulse 6s ease-in-out infinite;
+            }
+
+            .cta-headline-gradient {
+                background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 40%, #93c5fd 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+        </style>
+        <div class="cta-card">
+            <!-- Radial center glow -->
+            <div class="cta-glow"></div>
+            <!-- Subtle corner orbs -->
+            <div
+                style="position:absolute;top:-60px;right:-60px;width:260px;height:260px;background:rgba(139,92,246,0.12);border-radius:50%;pointer-events:none;filter:blur(40px);">
+            </div>
+            <div
+                style="position:absolute;bottom:-60px;left:-40px;width:200px;height:200px;background:rgba(59,130,246,0.1);border-radius:50%;pointer-events:none;filter:blur(30px);">
+            </div>
+
+            <div style="position: relative; z-index: 1; max-width: 700px; margin: 0 auto;">
+                <p
+                    style="font-size: 0.8rem; font-weight: 600; color: rgba(196,181,253,0.8); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 1.25rem;">
+                    ✦ Get Started Today ✦
+                </p>
+                <h2
+                    style="font-size: clamp(2rem, 4vw, 3.25rem); font-weight: 800; line-height: 1.15; margin-bottom: 1.25rem;">
+                    <span class="cta-headline-gradient">Your next breakthrough</span><br>
+                    <span style="color: rgba(255,255,255,0.9);">is one session away.</span>
+                </h2>
+                <p
+                    style="font-size: 1rem; color: rgba(203,213,225,0.75); margin-bottom: 2.5rem; line-height: 1.8; max-width: 520px; margin-left: auto; margin-right: auto;">
+
+                    Join thousands of professionals leveling up their skills with expert-led 1:1 sessions.
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="/signup" style="
+                        background: white;
+                        color: #4f46e5;
+                        font-weight: 700;
+                        padding: 1rem 2.5rem;
+                        border-radius: 12px;
+                        font-size: 1rem;
+                        transition: all 0.2s;
+                        display: inline-block;
+                        box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+                    " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'"
+                        onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(0,0,0,0.15)'">
+                        Book a Session
+                    </a>
+                    <a href="/signup" style="
+                        background: rgba(255,255,255,0.15);
+                        color: white;
+                        font-weight: 600;
+                        padding: 1rem 2.5rem;
+                        border-radius: 12px;
+                        font-size: 1rem;
+                        border: 1px solid rgba(255,255,255,0.3);
+                        transition: all 0.2s;
+                        display: inline-block;
+                        backdrop-filter: blur(8px);
+                    " onmouseover="this.style.background='rgba(255,255,255,0.25)'"
+                        onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+                        Become a Host →
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>

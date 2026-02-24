@@ -1,0 +1,795 @@
+<%- include('partials/header') %>
+
+    <style>
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table th {
+            background: var(--background-color);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-confirmed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-locked {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .form-hint {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+    </style>
+
+    <div class="container mt-2">
+        <h1>Host Dashboard</h1>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-3 mt-2">
+            <div class="stat-card">
+                <h3>
+                    <%= bookings.length %>
+                </h3>
+                <p>Total Bookings</p>
+            </div>
+            <div class="stat-card">
+                <h3>₹<%= totalEarnings.toFixed(2) %>
+                </h3>
+                <p>Total Earnings</p>
+            </div>
+            <div class="stat-card">
+                <h3>
+                    <%= availability.length %>
+                </h3>
+                <p>Availability Slots</p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs mt-2">
+            <div class="tab active" onclick="switchTab('availability')">Availability</div>
+            <div class="tab" onclick="switchTab('bookings')">Bookings</div>
+            <div class="tab" onclick="switchTab('reports')">Reports</div>
+        </div>
+
+        <!-- Availability Tab -->
+        <div id="availability" class="tab-content active">
+            <div class="grid grid-2">
+                <!-- Add Slot Form -->
+                <div class="card">
+                    <h2>Add Availability Slot</h2>
+                    <form action="/hosts/availability" method="POST" onsubmit="return handleFormSubmit(event)">
+                        <div class="form-group">
+                            <label>Slot Type</label>
+                            <select id="slotType" onchange="toggleSlotFields()">
+                                <option value="recurring">Recurring Weekly</option>
+                                <option value="specific">Specific Date</option>
+                            </select>
+                            <p class="form-hint">Choose recurring for weekly schedule or specific for one-time slots</p>
+                        </div>
+
+                        <div id="recurringFields">
+                            <div class="form-group">
+                                <label>Day of Week</label>
+                                <select name="dayOfWeek" id="dayOfWeek">
+                                    <option value="1">Monday</option>
+                                    <option value="2">Tuesday</option>
+                                    <option value="3">Wednesday</option>
+                                    <option value="4">Thursday</option>
+                                    <option value="5">Friday</option>
+                                    <option value="6">Saturday</option>
+                                    <option value="0">Sunday</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="specificFields" style="display: none;">
+                            <div class="form-group">
+                                <label>Specific Date</label>
+                                <input type="date" name="specificDate" id="specificDate"
+                                    min="<%= new Date().toISOString().split('T')[0] %>">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label>Start Time</label>
+                                <input type="time" name="startTime" id="startTime" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Slot Duration (mins)</label>
+                                <select name="slotDuration" id="slotDuration" onchange="calculateEndTime()">
+                                    <option value="15">15 minutes</option>
+                                    <option value="30">30 minutes</option>
+                                    <option value="45">45 minutes</option>
+                                    <option value="60" selected>60 minutes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label>Session Type</label>
+                                <select name="isFree" id="isFree" onchange="togglePriceField()">
+                                    <option value="false">Paid Session</option>
+                                    <option value="true">Free Session</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="priceField">
+                                <label>Price (₹)</label>
+                                <input type="number" name="price" value="1" min="0">
+                                <p class="form-hint">INR Price</p>
+                            </div>
+                            <div class="form-group" id="priceUsdField">
+                                <label>Price ($)</label>
+                                <input type="number" name="priceUsd" value="0" min="0">
+                                <p class="form-hint">USD Price</p>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Add Slot</button>
+                    </form>
+                </div>
+
+                <!-- Current Slots -->
+                <div class="card">
+                    <h2>Current Slots</h2>
+                    <% if (availability && availability.length> 0) { %>
+                        <div style="overflow-x: auto;">
+                            <table style="min-width: 600px;">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Day/Date</th>
+                                        <th>Time</th>
+                                        <th>Price</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% const days=['Sun' , 'Mon' , 'Tue' , 'Wed' , 'Thu' , 'Fri' , 'Sat' ]; %>
+                                        <% availability.forEach(slot=> { %>
+                                            <tr>
+                                                <td>
+                                                    <% if (slot.specificDate) { %>
+                                                        <span
+                                                            style="background: #fef3c7; color: #92400e; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">Specific</span>
+                                                        <% } else { %>
+                                                            <span
+                                                                style="background: #dbeafe; color: #1e40af; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.875rem;">Recurring</span>
+                                                            <% } %>
+                                                </td>
+                                                <td>
+                                                    <% if (slot.specificDate) { %>
+                                                        <strong>
+                                                            <%= new Date(slot.specificDate).toLocaleDateString('en-US',
+                                                                { weekday: 'short' , month: 'short' , day: 'numeric' ,
+                                                                year: 'numeric' }) %>
+                                                        </strong>
+                                                        <% } else { %>
+                                                            Every <%= days[slot.dayOfWeek] %>
+                                                                <% } %>
+                                                </td>
+                                                <td>
+                                                    <%= slot.startTime %> - <%= slot.endTime %>
+                                                </td>
+                                                <td>
+                                                    <% if (slot.isFree) { %>
+                                                        <span style="color: #059669; font-weight: 600;">FREE</span>
+                                                        <% } else { %>
+                                                            ₹<%= slot.price %> / $<%= slot.priceUsd %>
+                                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <form action="/hosts/availability/delete/<%= slot._id %>"
+                                                        method="POST" style="display: inline;">
+                                                        <button type="submit" class="btn btn-danger"
+                                                            style="padding: 0.25rem 0.5rem; font-size: 0.875rem;">Delete</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            <% }) %>
+                                </tbody>
+
+                            </table>
+                        </div>
+                        <% } else { %>
+                            <p class="text-light">No availability slots set yet.</p>
+                            <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings Tab -->
+        <div id="bookings" class="tab-content">
+            <div class="card">
+                <h2>Recent Bookings</h2>
+                <% if (bookings && bookings.length> 0) { %>
+                    <div style="overflow-x: auto;">
+                        <table style="min-width: 600px;">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% bookings.forEach(booking=> { %>
+                                    <tr>
+                                        <td>
+                                            <%= new Date(booking.startTime).toLocaleDateString() %>
+                                        </td>
+                                        <td>
+                                            <%= new Date(booking.startTime).toLocaleTimeString() %>
+                                        </td>
+                                        <td>
+                                            <%= booking.customer.name %>
+                                                <div class="form-hint">
+                                                    <%= booking.customer.email %>
+                                                </div>
+                                        </td>
+                                        <td>₹<%= booking.amount %>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge status-<%= booking.status %>">
+                                                <%= booking.status %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-secondary"
+                                                onclick="openEmailModal('<%= booking.customer.email %>', '<%= booking.customer.name %>')"
+                                                style="padding: 0.25rem 0.5rem; font-size: 0.875rem;">
+                                                📧 Message
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                            </tbody>
+
+                        </table>
+                    </div>
+                    <% } else { %>
+                        <p class="text-light">No bookings yet.</p>
+                        <% } %>
+            </div>
+        </div>
+
+        <!-- Custom Email Modal -->
+        <div id="emailModal" class="modal"
+            style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);">
+            <div class="card" style="max-width: 500px; margin: 10% auto; position: relative;">
+                <span onclick="closeEmailModal()"
+                    style="position: absolute; right: 20px; top: 20px; cursor: pointer; font-size: 1.5rem;">&times;</span>
+                <h2>Send Message to Customer</h2>
+                <form id="customEmailForm" onsubmit="sendCustomEmail(event)">
+                    <input type="hidden" id="modalCustomerEmail" name="customerEmail">
+                    <div class="form-group">
+                        <label>To</label>
+                        <input type="text" id="modalCustomerName" readonly style="background: #f3f4f6;">
+                    </div>
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" id="modalSubject" name="subject" value="Regarding your recent booking"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="modalMessage" name="message" rows="5" required
+                            placeholder="Type your message here..."></textarea>
+                    </div>
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                        <button type="button" class="btn btn-secondary" onclick="closeEmailModal()">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="emailSubmitBtn">Send Email</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Reports Tab -->
+        <div id="reports" class="tab-content">
+            <div class="grid grid-2">
+                <div class="card">
+                    <h2>User Journey Funnel</h2>
+                    <div class="funnel-container mt-2">
+                        <!-- Profile Views -->
+                        <div class="funnel-step">
+                            <div class="funnel-label">
+                                <span>Profile Views</span>
+                                <strong>
+                                    <%= funnel.views %>
+                                </strong>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 100%; background: #6366f1;"></div>
+                            </div>
+                        </div>
+
+                        <div class="funnel-divider">
+                            <span>Drop-off: <%= (100 - funnel.checkoutRate).toFixed(1) %>%</span>
+                        </div>
+
+                        <!-- Checkout -->
+                        <div class="funnel-step">
+                            <div class="funnel-label">
+                                <span>Reached Checkout</span>
+                                <strong>
+                                    <%= funnel.checkout %>
+                                </strong>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: var(--checkout-rate); background: #8b5cf6;">
+                                </div>
+                            </div>
+                            <div class="form-hint">Conversion: <%= funnel.checkoutRate %>%</div>
+                        </div>
+
+                        <div class="funnel-divider">
+                            <span>Drop-off: <%= (100 - funnel.paymentRate).toFixed(1) %>%</span>
+                        </div>
+
+                        <!-- Payment Start -->
+                        <div class="funnel-step">
+                            <div class="funnel-label">
+                                <span>Attempted Payment</span>
+                                <strong>
+                                    <%= funnel.payment %>
+                                </strong>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: var(--payment-rate); background: #ec4899;">
+                                </div>
+                            </div>
+                            <div class="form-hint">Conversion: <%= funnel.paymentRate %>%</div>
+                        </div>
+
+                        <div class="funnel-divider">
+                            <span>Drop-off: <%= (100 - funnel.successRate).toFixed(1) %>%</span>
+                        </div>
+
+                        <!-- Success -->
+                        <div class="funnel-step">
+                            <div class="funnel-label">
+                                <span>Successful Bookings</span>
+                                <strong>
+                                    <%= funnel.success %>
+                                </strong>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: var(--success-rate); background: #10b981;">
+                                </div>
+                            </div>
+                            <div class="form-hint">Success Rate: <%= funnel.successRate %>%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>Conversion Insights</h2>
+                    <div class="mt-2">
+                        <div class="stat-item mb-1">
+                            <label class="text-light">Overall Conversion Rate</label>
+                            <h3 style="color: var(--primary-color); font-size: 2rem;">
+                                <%= funnel.overallConversion %>%
+                            </h3>
+                            <p class="form-hint">From profile view to confirmed booking</p>
+                        </div>
+
+                        <div class="stat-item mb-1">
+                            <label class="text-light">Total Revenue</label>
+                            <h3 style="color: #059669; font-size: 2rem;">₹<%= totalEarnings.toFixed(2) %>
+                            </h3>
+                        </div>
+
+                        <div class="stat-item">
+                            <label class="text-light">Total Bookings</label>
+                            <h3 style="font-size: 1.5rem;">
+                                <%= funnel.success %>
+                            </h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Insights Row -->
+            <div class="card mt-2" id="ai-insights-card"
+                style="border: 1px solid #c084fc; background: linear-gradient(to bottom right, #ffffff, #faf5ff);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <div>
+                        <h2 style="color: #7e22ce;">✨ AI-Driven Growth Insights</h2>
+                        <p class="text-light">Analyze your booking patterns to increase conversion</p>
+                    </div>
+                    <button class="btn btn-primary" id="analyze-btn" onclick="runBehaviorAnalysis()"
+                        style="background: #7e22ce; border-color: #7e22ce;">
+                        🔄 Analyze My Behavior
+                    </button>
+                </div>
+
+                <div id="ai-loading" style="display: none; text-align: center; padding: 2rem;">
+                    <p>Analyzing slots, views, and conversion patterns...</p>
+                </div>
+
+                <div id="ai-results" style="display: none;">
+                    <div class="grid grid-3 mb-2">
+                        <div class="stat-item" style="background: #fdf4ff; border-radius: 12px; border: none;">
+                            <label class="text-light">Peak Traffic</label>
+                            <h4 id="best-hour" style="color: #a21caf;">---</h4>
+                        </div>
+                        <div class="stat-item" style="background: #eff6ff; border-radius: 12px; border: none;">
+                            <label class="text-light">Primary Lead Source</label>
+                            <h4 id="best-day" style="color: #1d4ed8;">---</h4>
+                        </div>
+                        <div class="stat-item" style="background: #f0fdf4; border-radius: 12px; border: none;">
+                            <label class="text-light">Funnel Health</label>
+                            <h4 id="funnel-health" style="color: #15803d;">---</h4>
+                        </div>
+                    </div>
+
+                    <div
+                        style="background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border-left: 4px solid #7e22ce;">
+                        <h3 id="ai-summary-title" style="margin-bottom: 0.5rem; font-size: 1.1rem;">Strategy Summary
+                        </h3>
+                        <p id="ai-note" style="line-height: 1.6; color: #334155;"></p>
+                    </div>
+
+                    <div class="card" style="background: #fffbeb; border: 1px solid #fde68a;">
+                        <h4 style="color: #92400e; margin-bottom: 0.75rem;">🚀 CMO Top Recommendation</h4>
+                        <div id="recommendations-list">
+                            <p id="top-action" style="font-weight: 600; font-size: 1.1rem; color: #78350f;"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demo Seeder (Only shown if user wants to see output) -->
+                <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px dashed #c084fc; text-align: center;">
+                    <p class="text-light mb-1" style="font-size: 0.8rem;">Don't see any insights? Click below to seed
+                        demo traffic data to see the CMO Observer in action.</p>
+                    <button class="btn btn-secondary" onclick="seedDemoAnalytics()"
+                        style="padding: 0.4rem 1rem; font-size: 0.8rem;">
+                        🌱 Seed Demo Data
+                    </button>
+                </div>
+            </div>
+
+            <style>
+                .funnel-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                }
+
+                .funnel-step {
+                    padding: 1rem;
+                    background: var(--background-color);
+                    border-radius: 8px;
+                }
+
+                .funnel-label {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 0.5rem;
+                }
+
+                .progress-bar {
+                    height: 8px;
+                    background: #e5e7eb;
+                    border-radius: 4px;
+                    overflow: hidden;
+                }
+
+                .progress-fill {
+                    height: 100%;
+                    transition: width 0.5s ease-out;
+                }
+
+                .funnel-divider {
+                    text-align: center;
+                    font-size: 0.75rem;
+                    color: #9ca3af;
+                    padding: 0.25rem 0;
+                    border-left: 2px dashed #e5e7eb;
+                    margin-left: 2rem;
+                }
+
+                .stat-item {
+                    padding: 1.5rem;
+                    border-bottom: 1px solid var(--border-color);
+                }
+
+                .stat-item:last-child {
+                    border-bottom: none;
+                }
+            </style>
+        </div>
+    </div>
+
+    <script>
+        // Use CSS variables to avoid linting issues with Template tags
+        document.documentElement.style.setProperty('--checkout-rate', '<%= funnel.checkoutRate %>%');
+        document.documentElement.style.setProperty('--payment-rate', '<%= (funnel.payment / funnel.views * 100).toFixed(1) %>%');
+        document.documentElement.style.setProperty('--success-rate', '<%= funnel.overallConversion %>%');
+
+        async function seedDemoAnalytics() {
+            if (!confirm('This will add 35+ sample analytics events to your account for testing. Continue?')) return;
+            try {
+                const response = await fetch('/hosts/seed-demo', { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                }
+            } catch (err) {
+                alert('Seed failed');
+            }
+        }
+
+        function handleFormSubmit(event) {
+            const slotType = document.getElementById('slotType').value;
+            const specificDate = document.getElementById('specificDate');
+            const dayOfWeek = document.getElementById('dayOfWeek');
+            const startTime = document.getElementById('startTime');
+            const endTime = document.getElementById('endTime');
+
+            // Validate required fields
+            if (!startTime.value || !endTime.value) {
+                alert('Please set start time and duration');
+                event.preventDefault();
+                return false;
+            }
+
+            if (slotType === 'specific') {
+                if (!specificDate.value) {
+                    alert('Please select a specific date');
+                    event.preventDefault();
+                    return false;
+                }
+                // Remove dayOfWeek from form submission
+                dayOfWeek.removeAttribute('name');
+            } else {
+                // Remove specificDate from form submission
+                specificDate.removeAttribute('name');
+            }
+
+            console.log('Form submitting with:', {
+                slotType,
+                dayOfWeek: dayOfWeek.value,
+                specificDate: specificDate.value,
+                startTime: startTime.value,
+                endTime: endTime.value
+            });
+
+            return true;
+        }
+
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function toggleSlotFields() {
+            const slotType = document.getElementById('slotType').value;
+            const recurringFields = document.getElementById('recurringFields');
+            const specificFields = document.getElementById('specificFields');
+            const dayOfWeek = document.getElementById('dayOfWeek');
+            const specificDate = document.getElementById('specificDate');
+
+            if (slotType === 'recurring') {
+                recurringFields.style.display = 'block';
+                specificFields.style.display = 'none';
+                dayOfWeek.required = true;
+                dayOfWeek.setAttribute('name', 'dayOfWeek');
+                specificDate.required = false;
+                specificDate.value = ''; // Clear the value
+            } else {
+                recurringFields.style.display = 'none';
+                specificFields.style.display = 'block';
+                dayOfWeek.required = false;
+                specificDate.required = true;
+                specificDate.setAttribute('name', 'specificDate');
+            }
+        }
+
+        function calculateEndTime() {
+            const startTime = document.getElementById('startTime').value;
+            const duration = parseInt(document.getElementById('slotDuration').value);
+
+            if (!startTime) return;
+
+            const [hours, minutes] = startTime.split(':').map(Number);
+            const startDate = new Date();
+            startDate.setHours(hours, minutes, 0);
+
+            const endDate = new Date(startDate.getTime() + duration * 60000);
+            const endHours = String(endDate.getHours()).padStart(2, '0');
+            const endMinutes = String(endDate.getMinutes()).padStart(2, '0');
+
+            document.getElementById('endTime').value = `${endHours}:${endMinutes}`;
+        }
+
+        // Auto-calculate end time when start time changes
+        document.getElementById('startTime').addEventListener('change', calculateEndTime);
+
+        // Initialize end time on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            calculateEndTime();
+            togglePriceField();
+        });
+
+        function togglePriceField() {
+            const isFree = document.getElementById('isFree').value === 'true';
+            document.getElementById('priceField').style.display = isFree ? 'none' : 'block';
+            document.getElementById('priceUsdField').style.display = isFree ? 'none' : 'block';
+        }
+
+        // Email Modal Functions
+        function openEmailModal(email, name) {
+            document.getElementById('modalCustomerEmail').value = email;
+            document.getElementById('modalCustomerName').value = name;
+            document.getElementById('emailModal').style.display = 'block';
+        }
+
+        function closeEmailModal() {
+            document.getElementById('emailModal').style.display = 'none';
+            document.getElementById('customEmailForm').reset();
+        }
+
+        async function sendCustomEmail(event) {
+            event.preventDefault();
+            const submitBtn = document.getElementById('emailSubmitBtn');
+            const originalText = submitBtn.innerText;
+
+            const formData = {
+                customerEmail: document.getElementById('modalCustomerEmail').value,
+                subject: document.getElementById('modalSubject').value,
+                message: document.getElementById('modalMessage').value
+            };
+
+            try {
+                submitBtn.innerText = 'Sending...';
+                submitBtn.disabled = true;
+
+                const response = await fetch('/hosts/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Email sent successfully!');
+                    closeEmailModal();
+                } else {
+                    alert('Failed to send email: ' + (result.error || 'Unknown error'));
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                alert('An error occurred while sending the email.');
+            } finally {
+                submitBtn.innerText = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function runBehaviorAnalysis() {
+            const btn = document.getElementById('analyze-btn');
+            const loading = document.getElementById('ai-loading');
+            const results = document.getElementById('ai-results');
+
+            try {
+                btn.disabled = true;
+                btn.innerText = 'Analyzing...';
+                loading.style.display = 'block';
+                results.style.display = 'none';
+
+                const response = await fetch('/hosts/analyze-behavior');
+                const data = await response.json();
+
+                if (data.error) throw new Error(data.error);
+
+                // Update UI
+                document.getElementById('best-hour').innerText = data.stats.peakHour;
+                document.getElementById('best-day').innerText = data.stats.bestDay;
+                document.getElementById('funnel-health').innerText = data.stats.conversionHealth;
+                document.getElementById('ai-note').innerText = data.personalizedNote;
+                document.getElementById('top-action').innerText = data.topAction;
+
+                loading.style.display = 'none';
+                results.style.display = 'block';
+            } catch (err) {
+                console.error(err);
+                alert('Analysis failed: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '🔄 Analyze My Behavior';
+            }
+        }
+    </script>
+
+
+    <%- include('partials/footer') %>

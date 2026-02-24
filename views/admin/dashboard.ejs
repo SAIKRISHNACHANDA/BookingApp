@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-nav {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .admin-nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+
+        .admin-nav a:hover {
+            text-decoration: underline;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .stat-card h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table th {
+            background: var(--background-color);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-confirmed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-locked {
+            background: #fef3c7;
+            color: #92400e;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="admin-nav">
+        <div class="container">
+            <div>
+                <strong>Admin Panel</strong>
+            </div>
+            <div>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/users">Users</a>
+                <a href="/admin/bookings">Bookings</a>
+                <a href="/admin/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+
+        <div class="grid grid-4 mt-2">
+            <div class="stat-card">
+                <h2>
+                    <%= stats.totalUsers %>
+                </h2>
+                <p>Total Users</p>
+            </div>
+            <div class="stat-card">
+                <h2>
+                    <%= stats.totalHosts %>
+                </h2>
+                <p>Total Hosts</p>
+            </div>
+            <div class="stat-card">
+                <h2>
+                    <%= stats.totalBookings %>
+                </h2>
+                <p>Total Bookings</p>
+            </div>
+            <div class="stat-card">
+                <h2>₹<%= stats.totalRevenue.toFixed(2) %>
+                </h2>
+                <p>Total Revenue</p>
+            </div>
+        </div>
+
+        <div class="card mt-2">
+            <h2>Recent Bookings</h2>
+            <% if (recentBookings && recentBookings.length> 0) { %>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Host</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% recentBookings.forEach(booking=> { %>
+                            <tr>
+                                <td>
+                                    <%= booking._id.toString().slice(-6) %>
+                                </td>
+                                <td>
+                                    <%= booking.host.name %>
+                                </td>
+                                <td>
+                                    <%= booking.customer.name %>
+                                </td>
+                                <td>
+                                    <%= new Date(booking.startTime).toLocaleDateString() %>
+                                </td>
+                                <td>₹<%= booking.amount %>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-<%= booking.status %>">
+                                        <%= booking.status %>
+                                    </span>
+                                </td>
+                            </tr>
+                            <% }) %>
+                    </tbody>
+                </table>
+                <% } else { %>
+                    <p class="text-light">No bookings yet.</p>
+                    <% } %>
+        </div>
+    </div>
+</body>
+
+</html>

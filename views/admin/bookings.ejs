@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-nav {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .admin-nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 1rem;
+        }
+
+        .admin-nav a:hover {
+            text-decoration: underline;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--primary-color);
+            background: white;
+            color: var(--primary-color);
+            border-radius: var(--radius);
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th,
+        table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        table th {
+            background: var(--background-color);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-confirmed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-locked {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="admin-nav">
+        <div class="container">
+            <div>
+                <strong>Admin Panel</strong>
+            </div>
+            <div>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/users">Users</a>
+                <a href="/admin/bookings">Bookings</a>
+                <a href="/admin/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Booking Management</h1>
+
+        <div class="filter-bar">
+            <a href="/admin/bookings" class="filter-btn <%= selectedStatus==='all' ? 'active' : '' %>">All Bookings</a>
+            <a href="/admin/bookings?status=confirmed"
+                class="filter-btn <%= selectedStatus==='confirmed' ? 'active' : '' %>">Confirmed</a>
+            <a href="/admin/bookings?status=locked"
+                class="filter-btn <%= selectedStatus==='locked' ? 'active' : '' %>">Locked</a>
+            <a href="/admin/bookings?status=cancelled"
+                class="filter-btn <%= selectedStatus==='cancelled' ? 'active' : '' %>">Cancelled</a>
+        </div>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Host</th>
+                        <th>Customer</th>
+                        <th>Date & Time</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% bookings.forEach(booking=> { %>
+                        <tr>
+                            <td>
+                                <%= booking._id.toString().slice(-6) %>
+                            </td>
+                            <td>
+                                <%= booking.host.name %>
+                            </td>
+                            <td>
+                                <%= booking.customer.name %>
+                            </td>
+                            <td>
+                                <%= new Date(booking.startTime).toLocaleString() %>
+                            </td>
+                            <td>₹<%= booking.amount %>
+                            </td>
+                            <td>
+                                <span class="status-badge status-<%= booking.status %>">
+                                    <%= booking.status %>
+                                </span>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

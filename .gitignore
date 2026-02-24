@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+dev.log
+startup.log
+final_startup.log
+
+# macOS
+.DS_Store
+
+# Environment variables (keep secrets safe!)
+.env
+
+# Test files
+test-email.js

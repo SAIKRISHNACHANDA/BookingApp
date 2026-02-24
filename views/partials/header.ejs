@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= typeof title !=='undefined' ? title : 'ExpertBook' %>
+    </title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        /* ── Floating Pill Header ── */
+        .nav-wrapper {
+            position: sticky;
+            top: 1rem;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            padding: 0 1rem;
+            pointer-events: none;
+        }
+
+        .nav-pill {
+            pointer-events: all;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            background: rgba(11, 17, 32, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            padding: 0.85rem 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        .nav-logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+            padding: 0.4rem 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .nav-logo span {
+            color: #818cf8;
+        }
+
+        .nav-links-center {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-link {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 0.45rem 0.9rem;
+            border-radius: 999px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 22px;
+            background: rgba(255, 255, 255, 0.15);
+            margin: 0 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .nav-btn-ghost {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.5rem 1.2rem;
+            border-radius: 999px;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            background: transparent;
+        }
+
+        .nav-btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.65);
+            color: white;
+        }
+
+        .nav-btn-primary {
+            background: #4f46e5;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
+            border-radius: 999px;
+            text-decoration: none;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);
+        }
+
+        .nav-btn-primary:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.5);
+        }
+
+        .nav-user-info {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            padding: 0.4rem 0.75rem;
+        }
+
+        /* Spacer so content doesn't hide under sticky header */
+        .nav-spacer {
+            height: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links-center {
+                display: none;
+            }
+
+            .nav-pill {
+                padding: 0.4rem 0.6rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="nav-spacer"></div>
+
+    <div class="nav-wrapper">
+        <nav class="nav-pill">
+            <!-- Logo -->
+            <a href="/" class="nav-logo">Expert<span>Book</span></a>
+
+            <!-- Center Nav Links -->
+            <div class="nav-links-center">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/" class="nav-link">Experts</a>
+                <a href="#" class="nav-link">Pricing</a>
+                <a href="#" class="nav-link">About</a>
+            </div>
+
+            <!-- Divider -->
+            <div class="nav-divider"></div>
+
+            <!-- Right Actions -->
+            <div class="nav-actions">
+                <% if (typeof user !=='undefined' && user) { %>
+                    <span class="nav-user-info">Hi, <%= user.name.split(' ')[0] %></span>
+                <% if (user.role === ' host') { %>
+                            <a href="/hosts/dashboard" class="nav-btn-ghost">Dashboard</a>
+                            <% } %>
+                                <a href="/logout" class="nav-btn-primary">Logout</a>
+                                <% } else { %>
+                                    <a href="/login" class="nav-btn-ghost">Login</a>
+                                    <a href="/signup" class="nav-btn-primary">Sign Up</a>
+                                    <% } %>
+            </div>
+        </nav>
+    </div>
+
+    <main class="container mt-2">
