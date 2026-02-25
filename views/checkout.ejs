@@ -152,6 +152,15 @@
                 font-weight: 600;
             }
 
+            .form-floating input.input-error {
+                border-color: #ef4444 !important;
+                box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+            }
+
+            .form-floating input.input-error+label {
+                color: #ef4444 !important;
+            }
+
             /* Currency and Payment Selection */
             .selection-grid {
                 display: grid;
@@ -275,11 +284,13 @@
             /* Toast Notification */
             #toast-container {
                 position: fixed;
-                bottom: 20px;
-                right: 20px;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
                 z-index: 9999;
                 display: flex;
                 flex-direction: column;
+                align-items: center;
                 gap: 10px;
             }
 
@@ -293,9 +304,9 @@
                 align-items: center;
                 gap: 12px;
                 min-width: 300px;
-                animation: slideIn 0.3s ease-out forwards;
+                animation: slideDown 0.3s ease-out forwards;
                 opacity: 0;
-                transform: translateX(100%);
+                transform: translateY(-20px);
             }
 
             .toast.success {
@@ -312,17 +323,17 @@
                 font-weight: 500;
             }
 
-            @keyframes slideIn {
+            @keyframes slideDown {
                 to {
                     opacity: 1;
-                    transform: translateX(0);
+                    transform: translateY(0);
                 }
             }
 
-            @keyframes fadeOut {
+            @keyframes fadeUp {
                 to {
                     opacity: 0;
-                    transform: translateX(100%);
+                    transform: translateY(-20px);
                 }
             }
 
@@ -466,7 +477,7 @@
 
             // Remove after 3 seconds
             setTimeout(() => {
-                toast.style.animation = 'fadeOut 0.3s ease-in forwards';
+                toast.style.animation = 'fadeUp 0.3s ease-in forwards';
                 setTimeout(() => {
                     toast.remove();
                 }, 300);
@@ -519,12 +530,37 @@
         document.getElementById('rzp-button1').onclick = async function (e) {
             e.preventDefault();
 
-            const name = document.getElementById('customerName').value;
-            const email = document.getElementById('customerEmail').value;
-            const whatsapp = document.getElementById('customerWhatsapp').value;
+            const nameInp = document.getElementById('customerName');
+            const emailInp = document.getElementById('customerEmail');
+            const whatsappInp = document.getElementById('customerWhatsapp');
+
+            const name = nameInp.value.trim();
+            const email = emailInp.value.trim();
+            const whatsapp = whatsappInp.value.trim();
+
+            const inputs = [nameInp, emailInp, whatsappInp];
+            inputs.forEach(el => el.classList.remove('input-error'));
+
+            // clear on input change as well
+            inputs.forEach(el => {
+                el.addEventListener('input', () => el.classList.remove('input-error'), { once: true });
+            });
 
             if (!name || !email || !whatsapp) {
-                showToast('Please fill in all details (Name, Email, WhatsApp Number)', 'error');
+                let firstEmpty = null;
+                // Reverse order so firstEmpty ends up being the top-most unfilled field
+                [whatsappInp, emailInp, nameInp].forEach(el => {
+                    if (!el.value.trim()) {
+                        el.classList.add('input-error');
+                        firstEmpty = el;
+                    }
+                });
+
+                showToast('Please fill in all details (Name, Email, WhatsApp)', 'error');
+
+                if (firstEmpty) {
+                    firstEmpty.focus();
+                }
                 return;
             }
 
