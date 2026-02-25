@@ -22,24 +22,14 @@
 
         .calendar-card {
             background: white;
-            border-radius: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
-            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            padding: 2.5rem;
             max-width: 900px;
             margin: 0 auto 5rem;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             position: relative;
-            overflow: hidden;
-        }
-
-        .calendar-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 6px;
-            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
         }
 
         .calendar-header {
@@ -97,19 +87,20 @@
         }
 
         .day {
-            aspect-ratio: 1;
+            width: 44px;
+            height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin: auto;
             border-radius: 50%;
             cursor: pointer;
             font-size: 0.95rem;
             color: #94a3b8;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
             position: relative;
-            margin: 2px;
             background: transparent;
-            border: 2px solid transparent;
+            border: 1px solid transparent;
         }
 
         .day.empty {
@@ -117,48 +108,47 @@
         }
 
         .day.available {
-            color: #4f46e5 !important;
+            color: #1e293b !important;
             font-weight: 600;
-            background: #eff6ff !important;
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
         }
 
         .day.today {
-            color: #4f46e5;
-            font-weight: 700;
+            font-weight: 600;
         }
 
         .day.today::before {
             content: '';
             position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
             border-radius: 50%;
-            border: 2px solid #e2e8f0;
-            box-sizing: border-box;
+            background: #1e293b;
             pointer-events: none;
         }
 
         .day.selected {
-            background-color: #4f46e5 !important;
+            background-color: #0f172a !important;
             color: white !important;
-            box-shadow: 0 8px 16px -4px rgba(79, 70, 229, 0.4);
+            border-color: #0f172a !important;
             transform: scale(1.05);
             z-index: 10;
         }
 
         .day.selected::after {
-            background-color: white !important;
-        }
-
-        .day.selected.today::before {
             display: none;
         }
 
+        .day.selected.today::before {
+            background: white;
+        }
+
         .day:hover:not(.empty):not(.disabled):not(.selected) {
-            background-color: #f1f5f9;
-            color: #0f172a;
+            border-color: #cbd5e1;
             transform: scale(1.05);
             z-index: 5;
         }
@@ -240,24 +230,21 @@
 
         .slot-btn {
             width: 100%;
-            padding: 1rem;
-            border: 1px solid #cbd5e1;
+            padding: 0.85rem;
+            border: 1px solid #e2e8f0;
             background: white;
-            color: #1e293b;
+            color: #334155;
             border-radius: 8px;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
             text-align: center;
         }
 
         .slot-btn:hover {
-            border-color: #4f46e5;
-            background: #eff6ff;
-            color: #4f46e5;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+            border-color: #0f172a;
+            color: #0f172a;
         }
 
         .timezone-footer {
