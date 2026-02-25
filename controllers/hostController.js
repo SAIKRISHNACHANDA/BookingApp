@@ -392,7 +392,7 @@ exports.connectGoogleCalendar = (req, res) => {
     if (!req.session.user || req.session.user.role !== 'host') {
         return res.status(403).send('Unauthorized');
     }
-    const authUrl = googleCalendarService.generateCalendarAuthUrl();
+    const authUrl = googleCalendarService.generateCalendarAuthUrl(req);
     res.redirect(authUrl);
 };
 
@@ -407,7 +407,7 @@ exports.calendarCallback = async (req, res) => {
     }
 
     try {
-        await googleCalendarService.saveCalendarTokens(req.session.user._id, code);
+        await googleCalendarService.saveCalendarTokens(req.session.user._id, code, req);
         res.redirect('/hosts/dashboard?msg=calendar_connected');
     } catch (err) {
         console.error('Failed to save calendar tokens:', err);

@@ -1,16 +1,20 @@
 const { google } = require('googleapis');
 const User = require('../models/User');
 
-const getOAuth2Client = () => {
+const getOAuth2Client = (req) => {
+    let baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    if (req) {
+        baseUrl = req.protocol + '://' + req.get('host');
+    }
     return new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
-        (process.env.BASE_URL || 'http://localhost:3000') + '/auth/google/calendar/callback'
+        baseUrl + '/auth/google/calendar/callback'
     );
 };
 
-exports.generateCalendarAuthUrl = () => {
-    const oauth2Client = getOAuth2Client();
+exports.generateCalendarAuthUrl = (req) => {
+    const oauth2Client = getOAuth2Client(req);
     return oauth2Client.generateAuthUrl({
         access_type: 'offline', // Crucial for refresh tokens
         prompt: 'consent', // Force consent so we always get refresh_token
@@ -18,8 +22,8 @@ exports.generateCalendarAuthUrl = () => {
     });
 };
 
-exports.saveCalendarTokens = async (userId, code) => {
-    const oauth2Client = getOAuth2Client();
+exports.saveCalendarTokens = async (userId, code, req) => {
+    const oauth2Client = getOAuth2Client(req);
     const { tokens } = await oauth2Client.getToken(code);
 
     // Update user with new tokens
