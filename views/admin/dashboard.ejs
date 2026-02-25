@@ -128,43 +128,45 @@
         <div class="card mt-2">
             <h2>Recent Bookings</h2>
             <% if (recentBookings && recentBookings.length> 0) { %>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Host</th>
-                            <th>Customer</th>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% recentBookings.forEach(booking=> { %>
+                <div style="overflow-x: auto;">
+                    <table style="min-width: 600px;">
+                        <thead>
                             <tr>
-                                <td>
-                                    <%= booking._id.toString().slice(-6) %>
-                                </td>
-                                <td>
-                                    <%= booking.host.name %>
-                                </td>
-                                <td>
-                                    <%= booking.customer.name %>
-                                </td>
-                                <td>
-                                    <%= new Date(booking.startTime).toLocaleDateString() %>
-                                </td>
-                                <td>₹<%= booking.amount %>
-                                </td>
-                                <td>
-                                    <span class="status-badge status-<%= booking.status %>">
-                                        <%= booking.status %>
-                                    </span>
-                                </td>
+                                <th>ID</th>
+                                <th>Host</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
                             </tr>
-                            <% }) %>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <% recentBookings.forEach(booking=> { %>
+                                <tr>
+                                    <td>
+                                        <%= booking._id.toString().slice(-6) %>
+                                    </td>
+                                    <td>
+                                        <%= booking.host.name %>
+                                    </td>
+                                    <td>
+                                        <%= booking.customer.name %>
+                                    </td>
+                                    <td>
+                                        <%= new Date(booking.startTime).toLocaleDateString() %>
+                                    </td>
+                                    <td>₹<%= booking.amount %>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge status-<%= booking.status %>">
+                                            <%= booking.status %>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <% }) %>
+                        </tbody>
+                    </table>
+                </div>
                 <% } else { %>
                     <p class="text-light">No bookings yet.</p>
                     <% } %>

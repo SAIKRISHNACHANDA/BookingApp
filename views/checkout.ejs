@@ -6,10 +6,21 @@
                 style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: var(--primary-gradient);">
             </div>
 
+            <style>
+                .checkout-col {
+                    padding: 2.5rem;
+                }
+
+                @media (max-width: 768px) {
+                    .checkout-col {
+                        padding: 1.5rem;
+                    }
+                }
+            </style>
             <div class="grid grid-2" style="gap: 0;">
                 <!-- Left: Booking Details -->
-                <div
-                    style="padding: 2.5rem; background: var(--background-color); border-right: 1px solid var(--border-color);">
+                <div class="checkout-col"
+                    style="background: var(--background-color); border-right: 1px solid var(--border-color);">
                     <h2 class="mb-1" style="font-size: 1.5rem;">Booking Details</h2>
 
                     <div class="mb-1"
@@ -106,7 +117,7 @@
                 </div>
 
                 <!-- Right: Contact & Payment -->
-                <div style="padding: 2.5rem;">
+                <div class="checkout-col">
                     <h2 class="mb-1" style="font-size: 1.5rem;">Your Information</h2>
                     <p class="text-light text-sm mb-1">Pass your details for the booking confirmation.</p>
 
