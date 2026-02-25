@@ -209,9 +209,13 @@
                 border-radius: 12px;
                 padding: 1rem 1.25rem;
                 display: flex;
+                flex-direction: row;
                 align-items: center;
+                justify-content: flex-start;
                 cursor: pointer;
                 transition: all 0.2s;
+                height: 70px;
+                text-align: left;
             }
 
             .gateway-box:hover {
@@ -223,10 +227,18 @@
                 background: #eff6ff;
             }
 
+            .gateway-text-container {
+                display: flex;
+                flex-direction: column;
+                text-align: left;
+                width: 100%;
+            }
+
             .gateway-box input[type="radio"] {
-                margin-right: 1rem;
+                margin-right: 1.25rem;
                 transform: scale(1.2);
                 accent-color: #4f46e5;
+                flex-shrink: 0;
             }
 
             /* Button */
@@ -401,7 +413,7 @@
                         <div class="gateway-row">
                             <div class="gateway-box active" onclick="selectGateway('razorpay')">
                                 <input type="radio" id="razorpay" name="gateway" value="razorpay" checked>
-                                <div style="flex:1;">
+                                <div class="gateway-text-container">
                                     <label for="razorpay"
                                         style="font-weight: 600; color:#1e293b; display:block; cursor:pointer;">Razorpay</label>
                                     <span style="font-size:0.8rem; color:#64748b;">UPI, Cards & NetBanking</span>
@@ -409,7 +421,7 @@
                             </div>
                             <div class="gateway-box" onclick="selectGateway('payu')">
                                 <input type="radio" id="payu" name="gateway" value="payu">
-                                <div style="flex:1;">
+                                <div class="gateway-text-container">
                                     <label for="payu"
                                         style="font-weight: 600; color:#1e293b; display:block; cursor:pointer;">PayU</label>
                                     <span style="font-size:0.8rem; color:#64748b;">International Cards</span>
