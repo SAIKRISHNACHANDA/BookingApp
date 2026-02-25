@@ -116,7 +116,7 @@ exports.sendBookingConfirmation = async (booking) => {
                         <!-- Footer -->
                         <tr>
                             <td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:24px 40px;text-align:center;">
-                                <p style="color:#9ca3af;font-size:12px;margin:0;">© 2026 ExpertBook. All rights reserved.</p>
+                                <p style="color:#9ca3af;font-size:12px;margin:0;">© 2026 Gurubrahma. All rights reserved.</p>
                                 <p style="color:#9ca3af;font-size:12px;margin:4px 0 0;">This is an automated confirmation email.</p>
                             </td>
                         </tr>
@@ -202,7 +202,7 @@ exports.sendBookingConfirmation = async (booking) => {
                         <!-- Footer -->
                         <tr>
                             <td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:24px 40px;text-align:center;">
-                                <p style="color:#9ca3af;font-size:12px;margin:0;">© 2026 ExpertBook. All rights reserved.</p>
+                                <p style="color:#9ca3af;font-size:12px;margin:0;">© 2026 Gurubrahma. All rights reserved.</p>
                                 <p style="color:#9ca3af;font-size:12px;margin:4px 0 0;">This is an automated notification email.</p>
                             </td>
                         </tr>
@@ -217,13 +217,13 @@ exports.sendBookingConfirmation = async (booking) => {
 
         await Promise.all([
             transporter.sendMail({
-                from: `"ExpertBook" <${process.env.EMAIL_USER}>`,
+                from: `"Gurubrahma" <${process.env.EMAIL_USER}>`,
                 to: booking.customer.email,
                 subject: '✅ Booking Confirmed – Session Details Inside',
                 html: customerHtml
             }),
             transporter.sendMail({
-                from: `"ExpertBook" <${process.env.EMAIL_USER}>`,
+                from: `"Gurubrahma" <${process.env.EMAIL_USER}>`,
                 to: hostEmail,
                 subject: `📅 New Booking from ${booking.customer.name}`,
                 html: hostHtml
@@ -250,7 +250,7 @@ exports.sendCustomEmail = async (to, subject, body, hostName) => {
                 <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:12px;">
                     <p>${body.replace(/\n/g, '<br>')}</p>
                     <hr style="border:none;border-top:1px solid #eee;margin-top:20px;">
-                    <p style="color:#9ca3af;font-size:12px;">This message was sent by ${hostName} via ExpertBook.</p>
+                    <p style="color:#9ca3af;font-size:12px;">This message was sent by ${hostName} via Gurubrahma.</p>
                 </div>`
         });
         console.log(`[EmailService] Custom email sent to ${to}`);
