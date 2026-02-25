@@ -1,6 +1,14 @@
 <%- include('partials/header') %>
 
-    <div class="container" style="max-width: 420px; margin-top: 4rem;">
+    <style>
+        @media (max-width: 480px) {
+            .container-auth {
+                margin-top: 2rem !important;
+                padding: 0 1rem;
+            }
+        }
+    </style>
+    <div class="container container-auth" style="max-width: 420px; margin-top: 4rem;">
         <div class="card">
             <h2 class="text-center mb-1">Create account</h2>
             <p class="subtitle">Join the community of top-tier gurus and learners</p>
