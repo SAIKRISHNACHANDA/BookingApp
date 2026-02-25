@@ -10,6 +10,7 @@ exports.getDashboard = async (req, res) => {
     }
     try {
         const hostId = new mongoose.Types.ObjectId(req.session.user._id);
+        const hostUser = await User.findById(hostId);
 
         const availability = await Availability.find({ host: hostId })
             .sort({ specificDate: -1, dayOfWeek: 1 });
@@ -66,7 +67,7 @@ exports.getDashboard = async (req, res) => {
 
         res.render('dashboard', {
             title: 'Dashboard',
-            user: req.session.user,
+            user: hostUser,
             availability,
             bookings,
             totalEarnings: totalEarnings[0]?.total || 0,
@@ -384,3 +385,33 @@ exports.seedDemoData = async (req, res) => {
         res.status(500).json({ error: 'Seeding failed' });
     }
 };
+
+const googleCalendarService = require('../services/googleCalendarService');
+
+exports.connectGoogleCalendar = (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'host') {
+        return res.status(403).send('Unauthorized');
+    }
+    const authUrl = googleCalendarService.generateCalendarAuthUrl();
+    res.redirect(authUrl);
+};
+
+exports.calendarCallback = async (req, res) => {
+    if (!req.session.user || req.session.user.role !== 'host') {
+        return res.status(403).send('Unauthorized');
+    }
+
+    const { code } = req.query;
+    if (!code) {
+        return res.send('No code provided');
+    }
+
+    try {
+        await googleCalendarService.saveCalendarTokens(req.session.user._id, code);
+        res.redirect('/hosts/dashboard?msg=calendar_connected');
+    } catch (err) {
+        console.error('Failed to save calendar tokens:', err);
+        res.redirect('/hosts/dashboard?error=calendar_failed');
+    }
+};
+

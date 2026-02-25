@@ -38,7 +38,8 @@ const bookingSchema = new mongoose.Schema({
         enum: ['razorpay', 'payu'],
         default: 'razorpay'
     },
-    meetingLink: String
+    meetingLink: String,
+    calendarEventId: String
 }, { timestamps: true });
 
 // Prevent double booking

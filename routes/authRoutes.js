@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const hostController = require('../controllers/hostController');
 const passport = require('../config/passport');
 
 router.get('/signup', authController.signupGet);
@@ -49,5 +50,9 @@ router.get('/auth/google/callback', (req, res, next) => {
         }
     });
 });
+
+// Google Calendar connect routes for hosts
+router.get('/auth/google/calendar', hostController.connectGoogleCalendar);
+router.get('/auth/google/calendar/callback', hostController.calendarCallback);
 
 module.exports = router;

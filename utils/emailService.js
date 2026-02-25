@@ -187,6 +187,13 @@ exports.sendBookingConfirmation = async (booking) => {
                                     </table>
                                 </div>
 
+                                ${booking.meetingLink ? `
+                                <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:20px;margin-bottom:28px;text-align:center;">
+                                    <p style="color:#1d4ed8;font-size:14px;margin:0 0 12px;font-weight:600;">🔗 Google Meet Link</p>
+                                    <a href="${booking.meetingLink}" style="background:#4f46e5;color:#ffffff;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Join Session</a>
+                                    <p style="color:#64748b;font-size:12px;margin:12px 0 0;">(This event has been added to your Google Calendar)</p>
+                                </div>` : ''}
+
                                 <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px 20px;margin-bottom:28px;">
                                     <p style="color:#15803d;font-size:14px;margin:0;">
                                         💡 <strong>Tip:</strong> Reach out to <strong>${booking.customer.name}</strong> before the session to confirm any details. Their WhatsApp: <strong>${booking.customer.whatsapp || 'Not provided'}</strong>

@@ -148,8 +148,12 @@ exports.createBookingOrder = async (req, res) => {
         });
         await booking.save();
 
-        // Populate host for emails
+        // Populate host for emails and calendar trigger
         const populatedBooking = await Booking.findById(booking._id).populate('host');
+
+        // Generate Google Meet Link
+        const { createMeetEvent } = require('../services/googleCalendarService');
+        await createMeetEvent(populatedBooking);
 
         // Send emails
         const { sendBookingConfirmation } = require('../utils/emailService');
@@ -234,6 +238,10 @@ exports.verifyPayment = async (req, res) => {
         booking.razorpayPaymentId = razorpay_payment_id;
         await booking.save();
 
+        // Generate Google Meet Link
+        const { createMeetEvent } = require('../services/googleCalendarService');
+        await createMeetEvent(booking);
+
         // Send Confirmation Emails
         const { sendBookingConfirmation } = require('../utils/emailService');
         sendBookingConfirmation(booking).catch(err => console.error('Email sending failed:', err));
@@ -306,6 +314,10 @@ exports.verifyPaymentRedirect = async (req, res) => {
         booking.razorpayPaymentId = razorpay_payment_id;
         await booking.save();
         console.log('[verifyPaymentRedirect] Booking confirmed:', booking._id);
+
+        // Generate Google Meet Link
+        const { createMeetEvent } = require('../services/googleCalendarService');
+        await createMeetEvent(booking);
 
         // Send Confirmation Emails
         const { sendBookingConfirmation } = require('../utils/emailService');
@@ -450,15 +462,17 @@ exports.payuResponse = async (req, res) => {
     }
 
     if (status === 'success') {
-        const booking = await Booking.findOne({ payuTxnId: txnid });
+        const booking = await Booking.findOne({ payuTxnId: txnid }).populate('host');
         if (booking) {
             booking.status = 'confirmed';
             await booking.save();
 
+            // Generate Google Meet Link
+            const { createMeetEvent } = require('../services/googleCalendarService');
+            await createMeetEvent(booking);
+
             // Email Logic
             const { sendBookingConfirmation } = require('../utils/emailService');
-            // Populate Host for email
-            await booking.populate('host');
             sendBookingConfirmation(booking).catch(console.error);
 
             // Analytics
