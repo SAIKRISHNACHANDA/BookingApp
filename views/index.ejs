@@ -142,6 +142,29 @@
                 transform: scale(1.05);
                 box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
             }
+
+            @media (max-width: 768px) {
+                .premium-search-box {
+                    flex-direction: column;
+                    border-radius: 16px;
+                    padding: 0.5rem;
+                    background: transparent;
+                    border: none;
+                }
+
+                .search-input {
+                    width: 100%;
+                    border-radius: 12px;
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    margin-bottom: 0.5rem;
+                }
+
+                .search-btn {
+                    width: 100%;
+                    border-radius: 12px;
+                }
+            }
         </style>
 
         <div class="hero-bg-grid"></div>
@@ -574,6 +597,62 @@
                 -webkit-text-fill-color: transparent;
                 background-clip: text;
             }
+
+            .cta-btn-primary {
+                background: white;
+                color: #4f46e5;
+                font-weight: 700;
+                padding: 1rem 2.5rem;
+                border-radius: 12px;
+                font-size: 1rem;
+                transition: all 0.2s;
+                display: inline-block;
+                box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+                text-decoration: none;
+            }
+
+            .cta-btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            }
+
+            .cta-btn-secondary {
+                background: rgba(255, 255, 255, 0.15);
+                color: white;
+                font-weight: 600;
+                padding: 1rem 2.5rem;
+                border-radius: 12px;
+                font-size: 1rem;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                transition: all 0.2s;
+                display: inline-block;
+                backdrop-filter: blur(8px);
+                text-decoration: none;
+            }
+
+            .cta-btn-secondary:hover {
+                background: rgba(255, 255, 255, 0.25);
+            }
+
+            .cta-btn-container {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            @media (max-width: 480px) {
+                .cta-btn-container {
+                    flex-direction: column;
+                }
+
+                .cta-btn-primary,
+                .cta-btn-secondary {
+                    width: 100%;
+                    padding: 1rem 1.5rem;
+                    text-align: center;
+                }
+            }
         </style>
         <div class="cta-card">
             <!-- Radial center glow -->
@@ -598,39 +677,11 @@
                 </h2>
                 <p
                     style="font-size: 1rem; color: rgba(203,213,225,0.75); margin-bottom: 2.5rem; line-height: 1.8; max-width: 520px; margin-left: auto; margin-right: auto;">
-
                     Join thousands of professionals leveling up their skills with expert-led 1:1 sessions.
                 </p>
-                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                    <a href="/signup" style="
-                        background: white;
-                        color: #4f46e5;
-                        font-weight: 700;
-                        padding: 1rem 2.5rem;
-                        border-radius: 12px;
-                        font-size: 1rem;
-                        transition: all 0.2s;
-                        display: inline-block;
-                        box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-                    " onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)'"
-                        onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(0,0,0,0.15)'">
-                        Book a Session
-                    </a>
-                    <a href="/signup" style="
-                        background: rgba(255,255,255,0.15);
-                        color: white;
-                        font-weight: 600;
-                        padding: 1rem 2.5rem;
-                        border-radius: 12px;
-                        font-size: 1rem;
-                        border: 1px solid rgba(255,255,255,0.3);
-                        transition: all 0.2s;
-                        display: inline-block;
-                        backdrop-filter: blur(8px);
-                    " onmouseover="this.style.background='rgba(255,255,255,0.25)'"
-                        onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-                        Become a Host →
-                    </a>
+                <div class="cta-btn-container">
+                    <a href="/signup" class="cta-btn-primary">Book a Session</a>
+                    <a href="/signup" class="cta-btn-secondary">Become a Host →</a>
                 </div>
             </div>
         </div>
