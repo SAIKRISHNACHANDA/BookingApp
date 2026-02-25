@@ -36,8 +36,8 @@ exports.getBookingPage = async (req, res) => {
         const { findMatchingAvailability } = require('../utils/slotUtils');
         const rule = await findMatchingAvailability(hostId, startTime);
 
-        const amount = rule ? (rule.isFree ? 0 : 1) : 1; // Force 1 Rupee display for testing
-        const amountUsd = rule ? (rule.isFree ? 0 : 1) : 1; // Force 1 USD display for testing
+        const amount = rule ? (rule.isFree ? 0 : (rule.price || host.hourlyRate || 0)) : (host.hourlyRate || 0);
+        const amountUsd = rule ? (rule.isFree ? 0 : (rule.priceUsd || host.hourlyRateUsd || 0)) : (host.hourlyRateUsd || 0);
         const isFree = rule ? rule.isFree : false;
 
         // Log Checkout View Analytics
@@ -101,16 +101,15 @@ exports.createBookingOrder = async (req, res) => {
 
     const isFree = rule.isFree;
 
-    // Force 1 unit (Rupee/USD) for testing "everywhere" as requested
-    let amount = 1;
+    let amount = 0;
     let selectedCurrency = 'INR';
 
     if (!isFree) {
         if (currency === 'USD') {
-            amount = 1; // Force 1 USD
+            amount = rule.priceUsd || host.hourlyRateUsd || 0;
             selectedCurrency = 'USD';
         } else {
-            amount = 1; // Force 1 INR
+            amount = rule.price || host.hourlyRate || 0;
             selectedCurrency = 'INR';
         }
     }
@@ -350,14 +349,12 @@ exports.createPayUOrder = async (req, res) => {
     const rule = await findMatchingAvailability(hostId, startTime);
     if (!rule) return res.status(400).json({ error: 'Slot validation failed' });
 
-    let amount = 1; // Force 1 unit for testing as requested
-    /*
+    let amount = 0;
     if (currency === 'USD') {
-        amount = rule.priceUsd || 0;
+        amount = rule.priceUsd || host.hourlyRateUsd || 0;
     } else {
-        amount = rule.price || 0;
+        amount = rule.price || host.hourlyRate || 0;
     }
-    */
 
     const txnid = 'txn_' + Date.now();
     let payuKey = process.env.PAYU_MERCHANT_KEY;

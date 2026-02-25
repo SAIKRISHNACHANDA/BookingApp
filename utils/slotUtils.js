@@ -139,27 +139,22 @@ async function findMatchingAvailability(hostId, startTime) {
     // Check for specific date rule first
     let rule = await Availability.findOne({
         host: hostId,
-        specificDate: { $ne: null },
-        startTime: { $lte: startTimeStr },
-        endTime: { $gt: startTimeStr }
+        specificDate: { $ne: null }
     });
+
+    if (rule && rule.specificDate) {
+        const ruleDate = new Date(rule.specificDate).toISOString().split('T')[0];
+        const targetDate = date.toISOString().split('T')[0];
+        if (ruleDate !== targetDate) rule = null; // Reset if date doesn't match
+    }
 
     if (!rule) {
         // Check for recurring rule
         rule = await Availability.findOne({
             host: hostId,
             dayOfWeek: dayOfWeek,
-            specificDate: null,
-            startTime: { $lte: startTimeStr },
-            endTime: { $gt: startTimeStr }
+            specificDate: null
         });
-    }
-
-    // Double check specific date matches exactly if it was a specific date rule
-    if (rule && rule.specificDate) {
-        const ruleDate = new Date(rule.specificDate).toISOString().split('T')[0];
-        const targetDate = date.toISOString().split('T')[0];
-        if (ruleDate !== targetDate) return null;
     }
 
     return rule;
