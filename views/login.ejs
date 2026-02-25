@@ -59,19 +59,44 @@
         }
 
         .brand-logo {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2.2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            /* standard property */
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
             text-decoration: none;
             position: relative;
             z-index: 1;
+        }
+
+        .logo-icon {
+            border-radius: 10px;
+            background: linear-gradient(135deg, #4f46e5 0%, #c084fc 100%);
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        .logo-icon svg {
+            color: white;
+            width: 24px;
+            height: 24px;
+        }
+
+        .logo-text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ffffff;
             letter-spacing: -1px;
-            display: inline-block;
+        }
+
+        .logo-text span {
+            background: linear-gradient(135deg, #38bdf8 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .left-content {
@@ -330,7 +355,19 @@
 
     <!-- Left Panel -->
     <div class="left-panel">
-        <a href="/" class="brand-logo">GuruBrahma</a>
+        <a href="/" class="brand-logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+                    <line x1="12" y1="22" x2="12" y2="15.5"></line>
+                    <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+                    <polyline points="2 15.5 12 8.5 22 15.5"></polyline>
+                    <line x1="12" y1="2" x2="12" y2="8.5"></line>
+                </svg>
+            </div>
+            <div class="logo-text">Guru<span>Brahma</span></div>
+        </a>
 
         <div class="left-content">
             <p class="eyebrow">✦ Welcome back</p>

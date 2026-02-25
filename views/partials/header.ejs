@@ -40,20 +40,45 @@
             max-width: 1400px;
         }
 
-        .nav-logo {
+        .nav-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            padding: 0.2rem 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .nav-logo-icon {
+            background: linear-gradient(135deg, #4f46e5 0%, #c084fc 100%);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(79, 70, 229, 0.4);
+        }
+
+        .nav-logo-icon svg {
+            color: white;
+            width: 18px;
+            height: 18px;
+        }
+
+        .nav-logo-text {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-logo-text span {
+            background: linear-gradient(135deg, #38bdf8 0%, #c084fc 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            /* standard property */
-            text-decoration: none;
-            padding: 0.4rem 0.75rem;
-            flex-shrink: 0;
-            letter-spacing: -1px;
-            display: inline-block;
         }
 
         .nav-links-center {
@@ -207,7 +232,19 @@
     <div class="nav-wrapper">
         <nav class="nav-pill">
             <!-- Logo -->
-            <a href="/" class="nav-logo">GuruBrahma</a>
+            <a href="/" class="nav-logo-container">
+                <div class="nav-logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+                        <line x1="12" y1="22" x2="12" y2="15.5"></line>
+                        <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+                        <polyline points="2 15.5 12 8.5 22 15.5"></polyline>
+                        <line x1="12" y1="2" x2="12" y2="8.5"></line>
+                    </svg>
+                </div>
+                <div class="nav-logo-text">Guru<span>Brahma</span></div>
+            </a>
 
             <!-- Center Nav Links -->
             <div class="nav-links-center">
