@@ -655,9 +655,15 @@
                 if (data.slots && data.slots.length > 0) {
                     slotsList.innerHTML = '';
                     data.slots.forEach(slot => {
+                        const localStart = new Date(slot.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+                        const localEnd = new Date(slot.end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+
+                        slot.localStartTime = localStart;
+                        slot.localEndTime = localEnd;
+
                         const btn = document.createElement('button');
                         btn.className = 'slot-btn';
-                        btn.innerText = slot.startTime;
+                        btn.innerText = localStart;
                         btn.onclick = () => showFinalSelection(slot, displayDate);
                         slotsList.appendChild(btn);
                     });
@@ -702,7 +708,7 @@
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.95rem;">
                             <span style="color: #64748b; font-weight: 500;">Time</span>
-                            <span style="color: #0f172a; font-weight: 600;">${slot.startTime} - ${slot.endTime}</span>
+                            <span style="color: #0f172a; font-weight: 600;">${slot.localStartTime} - ${slot.localEndTime}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.95rem;">
                             <span style="color: #64748b; font-weight: 500;">Duration</span>
