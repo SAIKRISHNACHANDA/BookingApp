@@ -323,25 +323,13 @@
                         "name": "ExpertBook",
                         "description": "Session Booking",
                         "order_id": data.order.id,
-                        "handler": async function (response) {
-                            const verifyRes = await fetch('/bookings/verify-payment', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    razorpay_order_id: response.razorpay_order_id,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_signature: response.razorpay_signature,
-                                    booking_id: data.bookingId
-                                })
-                            });
 
-                            if (verifyRes.ok) {
-                                window.location.href = '/bookings/success';
-                            } else {
-                                alert("Payment Verification Failed");
-                                resetButton(btn, originalText);
-                            }
-                        },
+                        // ✅ redirect: true — Razorpay redirects to callback_url
+                        // for ALL payment methods: UPI QR, mobile, cards, netbanking
+                        // This is more reliable than the handler for external payments
+                        "redirect": true,
+                        "callback_url": window.location.origin + "/bookings/verify-payment-redirect?booking_id=" + data.bookingId,
+
                         "prefill": {
                             "name": name,
                             "email": email,

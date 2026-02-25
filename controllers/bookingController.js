@@ -250,6 +250,82 @@ exports.verifyPayment = async (req, res) => {
     }
 };
 
+// ✅ Mobile Redirect Handler — Razorpay POSTs here after redirect-based payment on phones
+exports.verifyPaymentRedirect = async (req, res) => {
+    console.log('[verifyPaymentRedirect] Mobile redirect callback received:', req.body);
+
+    const {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature
+    } = req.body;
+
+    // booking_id comes as a query param (appended to callback_url)
+    const booking_id = req.query.booking_id;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !booking_id) {
+        console.error('[verifyPaymentRedirect] Missing required fields', { razorpay_order_id, razorpay_payment_id, razorpay_signature, booking_id });
+        return res.redirect('/bookings/payment-failed?reason=missing_fields');
+    }
+
+    try {
+        const booking = await Booking.findById(booking_id).populate('host');
+        if (!booking) {
+            console.error('[verifyPaymentRedirect] Booking not found:', booking_id);
+            return res.redirect('/bookings/payment-failed?reason=booking_not_found');
+        }
+
+        // Already confirmed? (duplicate callback guard)
+        if (booking.status === 'confirmed') {
+            console.log('[verifyPaymentRedirect] Booking already confirmed, redirecting to success');
+            return res.redirect('/bookings/success');
+        }
+
+        // Select Secret based on Currency
+        let secret = process.env.RAZORPAY_KEY_SECRET;
+        if (booking.currency === 'USD') {
+            secret = process.env.RAZORPAY_KEY_SECRET_USD || process.env.RAZORPAY_KEY_SECRET;
+        }
+
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+            .createHmac("sha256", secret)
+            .update(body.toString())
+            .digest("hex");
+
+        if (expectedSignature !== razorpay_signature) {
+            console.error('[verifyPaymentRedirect] Signature mismatch!');
+            return res.redirect('/bookings/payment-failed?reason=signature_mismatch');
+        }
+
+        // ✅ Signature valid — confirm the booking
+        booking.status = 'confirmed';
+        booking.razorpayPaymentId = razorpay_payment_id;
+        await booking.save();
+        console.log('[verifyPaymentRedirect] Booking confirmed:', booking._id);
+
+        // Send Confirmation Emails
+        const { sendBookingConfirmation } = require('../utils/emailService');
+        sendBookingConfirmation(booking).catch(err => console.error('Email failed:', err));
+
+        // Log Analytics
+        const Analytics = require('../models/Analytics');
+        await Analytics.create({
+            host: booking.host._id,
+            event: 'payment_success',
+            sessionId: req.sessionID,
+            metadata: { bookingId: booking_id, amount: booking.amount, via: 'mobile_redirect' }
+        }).catch(err => console.error('Analytics error:', err));
+
+        return res.redirect('/bookings/success');
+
+    } catch (err) {
+        console.error('[verifyPaymentRedirect] Error:', err);
+        return res.redirect('/bookings/payment-failed?reason=server_error');
+    }
+};
+
+
 exports.createPayUOrder = async (req, res) => {
     const { hostId, startTime, endTime, currency, customerName, customerEmail, customerWhatsapp } = req.body;
 
