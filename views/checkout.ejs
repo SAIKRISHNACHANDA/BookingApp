@@ -8,7 +8,175 @@
 
             <style>
                 .checkout-col {
-                    padding: 2.5rem;
+                    padding: 3rem;
+                }
+
+                .form-control {
+                    width: 100%;
+                    padding: 0.875rem 1rem;
+                    border: 1px solid var(--border-color);
+                    border-radius: var(--radius-sm);
+                    font-size: 1rem;
+                    transition: all 0.2s;
+                    background: #f8fafc;
+                    color: var(--text-color);
+                }
+
+                .form-control:focus {
+                    outline: none;
+                    border-color: var(--primary-color);
+                    background: white;
+                    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+                }
+
+                .form-label {
+                    display: block;
+                    margin-bottom: 0.5rem;
+                    font-weight: 500;
+                    color: #475569;
+                    font-size: 0.95rem;
+                }
+
+                .section-title {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin-bottom: 1.5rem;
+                    padding-bottom: 1rem;
+                    border-bottom: 1px solid #e2e8f0;
+                }
+
+                .info-row {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-bottom: 1rem;
+                    padding-bottom: 1rem;
+                    border-bottom: 1px dashed #e2e8f0;
+                }
+
+                .info-row:last-child {
+                    border-bottom: none;
+                }
+
+                .info-label {
+                    color: #64748b;
+                    font-size: 0.95rem;
+                }
+
+                .info-value {
+                    font-weight: 600;
+                    color: #0f172a;
+                    text-align: right;
+                }
+
+                .currency-card {
+                    border: 2px solid var(--border-color);
+                    border-radius: 12px;
+                    /* Smoother radius */
+                    padding: 1.25rem;
+                    cursor: pointer;
+                    transition: all 0.3s cubicbezier(0.4, 0, 0.2, 1);
+                    flex: 1;
+                    text-align: center;
+                    background: white;
+                    position: relative;
+                }
+
+                .currency-card:hover {
+                    border-color: var(--primary-light);
+                    transform: translateY(-4px);
+                    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+                }
+
+                .currency-card.selected-currency {
+                    border-color: var(--primary-color);
+                    background-color: #eff6ff;
+                    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1), 0 2px 4px -1px rgba(79, 70, 229, 0.06);
+                }
+
+                .currency-card h3 {
+                    margin: 0;
+                    color: var(--text-color);
+                    font-size: 1.75rem;
+                    font-weight: 700;
+                    letter-spacing: -0.02em;
+                }
+
+                .check-icon {
+                    display: none;
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    color: var(--primary-color);
+                    font-size: 1.2rem;
+                    background: white;
+                    border-radius: 50%;
+                    width: 24px;
+                    height: 24px;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+
+                .selected-currency .check-icon {
+                    display: flex;
+                }
+
+                .gateway-option {
+                    display: flex;
+                    align-items: center;
+                    padding: 1.25rem;
+                    border: 1px solid var(--border-color);
+                    border-radius: 12px;
+                    margin-bottom: 1rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    position: relative;
+                    background: white;
+                }
+
+                .gateway-option:hover {
+                    border-color: var(--primary-light);
+                    background: #f8fafc;
+                    transform: translateY(-2px);
+                }
+
+                .gateway-option.selected {
+                    border-color: var(--primary-color);
+                    background: #eff6ff;
+                    box-shadow: 0 0 0 1px var(--primary-color);
+                }
+
+                .gateway-radio {
+                    margin-right: 1.25rem;
+                    accent-color: var(--primary-color);
+                    transform: scale(1.3);
+                }
+
+                .btn-pay {
+                    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+                    color: white;
+                    border: none;
+                    padding: 1rem;
+                    border-radius: 12px;
+                    font-weight: 600;
+                    font-size: 1.1rem;
+                    width: 100%;
+                    margin-top: 1.5rem;
+                    transition: all 0.3s;
+                    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+                    cursor: pointer;
+                }
+
+                .btn-pay:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
+                }
+
+                .btn-pay:disabled {
+                    opacity: 0.7;
+                    cursor: not-allowed;
+                    transform: none;
                 }
 
                 @media (max-width: 768px) {
@@ -16,196 +184,209 @@
                         padding: 1.5rem;
                     }
                 }
+
+                /* Toast Notification */
+                #toast-container {
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    z-index: 9999;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .toast {
+                    background: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                    border-left: 5px solid #3b82f6;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    min-width: 300px;
+                    animation: slideIn 0.3s ease-out forwards;
+                    opacity: 0;
+                    transform: translateX(100%);
+                }
+
+                .toast.success {
+                    border-color: #10b981;
+                }
+
+                .toast.error {
+                    border-color: #ef4444;
+                }
+
+                .toast-message {
+                    font-size: 0.95rem;
+                    color: #1e293b;
+                    font-weight: 500;
+                }
+
+                @keyframes slideIn {
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+
+                @keyframes fadeOut {
+                    to {
+                        opacity: 0;
+                        transform: translateX(100%);
+                    }
+                }
             </style>
             <div class="grid grid-2" style="gap: 0;">
                 <!-- Left: Booking Details -->
-                <div class="checkout-col"
-                    style="background: var(--background-color); border-right: 1px solid var(--border-color);">
-                    <h2 class="mb-1" style="font-size: 1.5rem;">Booking Details</h2>
+                <div class="checkout-col" style="background: #f8fafc; border-right: 1px solid var(--border-color);">
+                    <h2 class="section-title">Booking Details</h2>
 
-                    <div class="mb-1"
-                        style="background: white; padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                        <div class="text-light text-sm mb-0.5">Host</div>
-                        <div class="font-semibold" style="font-size: 1.1rem;">
+                    <div class="info-row">
+                        <span class="info-label">Host</span>
+                        <span class="info-value">
                             <%= host.name %>
-                        </div>
+                        </span>
                     </div>
 
-                    <div class="mb-1"
-                        style="background: white; padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                        <div class="text-light text-sm mb-0.5">Date & Time</div>
-                        <div class="font-semibold">
+                    <div class="info-row">
+                        <span class="info-label">Date & Time</span>
+                        <span class="info-value" style="text-align: right;">
                             <%= start %>
-                        </div>
+                        </span>
                     </div>
 
-                    <div
-                        style="background: white; padding: 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                        <div class="text-light text-sm mb-0.5">Duration</div>
-                        <div class="font-semibold">
+                    <div class="info-row">
+                        <span class="info-label">Duration</span>
+                        <span class="info-value">
                             <%= duration %> Minutes
-                        </div>
+                        </span>
                     </div>
 
                     <% if (!isFree) { %>
                         <div class="currency-selection mt-2">
-                            <style>
-                                .currency-card {
-                                    border: 2px solid var(--border-color);
-                                    border-radius: var(--radius-sm);
-                                    padding: 1rem;
-                                    cursor: pointer;
-                                    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-                                    flex: 1;
-                                    text-align: center;
-                                    background: white;
-                                    position: relative;
-                                }
-
-                                .currency-card:hover {
-                                    border-color: var(--primary-light);
-                                    transform: translateY(-2px);
-                                    box-shadow: var(--shadow-sm);
-                                }
-
-                                .currency-card.selected-currency {
-                                    border-color: var(--primary-color);
-                                    background-color: #eff6ff;
-                                    box-shadow: var(--shadow);
-                                }
-
-                                .check-icon {
-                                    display: none;
-                                    position: absolute;
-                                    top: 8px;
-                                    right: 8px;
-                                    color: var(--primary-color);
-                                    font-size: 1.1rem;
-                                }
-
-                                .selected-currency .check-icon {
-                                    display: block;
-                                }
-                            </style>
-
-                            <p class="mb-1 text-sm font-semibold text-light uppercase" style="letter-spacing: 0.05em;">
+                            <p class="form-label uppercase text-sm"
+                                style="letter-spacing: 0.05em; color: #94a3b8; font-size: 0.8rem;">
                                 Select Currency</p>
                             <div class="flex gap-1">
                                 <div id="card-INR" class="currency-card selected-currency"
                                     onclick="selectCurrency('INR')">
                                     <div class="check-icon">✓</div>
-                                    <h3 style="margin: 0; color: var(--text-color); font-size: 1.5rem;">₹<%=
-                                            amount.toFixed(2) %>
+                                    <h3>₹<%= amount.toFixed(2) %>
                                     </h3>
-                                    <small class="text-light">INR</small>
+                                    <small class="text-light font-medium">INR</small>
                                 </div>
                                 <div id="card-USD" class="currency-card" onclick="selectCurrency('USD')">
                                     <div class="check-icon">✓</div>
-                                    <h3 style="margin: 0; color: var(--text-color); font-size: 1.5rem;">$<%=
-                                            amountUsd.toFixed(2) %>
+                                    <h3>$<%= amountUsd.toFixed(2) %>
                                     </h3>
-                                    <small class="text-light">USD</small>
+                                    <small class="text-light font-medium">USD</small>
                                 </div>
                             </div>
                         </div>
                         <% } else { %>
-                            <div class="mt-2 text-center p-2"
-                                style="background: #ecfdf5; color: #047857; border-radius: var(--radius-sm);">
-                                <strong style="font-size: 1.25rem;">FREE SESSION</strong>
+                            <div class="mt-2 text-center p-3"
+                                style="background: #ecfdf5; color: #047857; border-radius: 12px; border: 1px dashed #10b981;">
+                                <strong style="font-size: 1.1rem; display: block; margin-bottom: 0.25rem;">🎉 FREE
+                                    SESSION</strong>
+                                <span style="font-size: 0.9rem;">No payment required for this booking.</span>
                             </div>
                             <% } %>
                 </div>
 
                 <!-- Right: Contact & Payment -->
-                <div class="checkout-col">
-                    <h2 class="mb-1" style="font-size: 1.5rem;">Your Information</h2>
-                    <p class="text-light text-sm mb-1">Pass your details for the booking confirmation.</p>
+                <div class="checkout-col" style="background: white;">
+                    <h2 class="section-title">Your Information</h2>
+                    <p class="text-light text-sm mb-2">Please verify your details below.</p>
 
-                    <div class="form-group">
-                        <label for="customerName">Full Name</label>
-                        <input type="text" id="customerName" placeholder="John Doe" value="<%= user ? user.name : '' %>"
-                            required>
+                    <div class="form-group mb-1.5">
+                        <label class="form-label" for="customerName">Full Name</label>
+                        <input type="text" id="customerName" class="form-control" placeholder="John Doe"
+                            value="<%= user ? user.name : '' %>" required>
                     </div>
 
-                    <div class="form-group">
-                        <label for="customerEmail">Email Address</label>
-                        <input type="email" id="customerEmail" placeholder="john@example.com"
+                    <div class="form-group mb-1.5">
+                        <label class="form-label" for="customerEmail">Email Address</label>
+                        <input type="email" id="customerEmail" class="form-control" placeholder="john@example.com"
                             value="<%= user ? user.email : '' %>" required>
                     </div>
 
-                    <div class="form-group">
-                        <label for="customerWhatsapp">WhatsApp Number</label>
-                        <input type="tel" id="customerWhatsapp" placeholder="+91 9876543210" required>
+                    <div class="form-group mb-2">
+                        <label class="form-label" for="customerWhatsapp">WhatsApp Number</label>
+                        <input type="tel" id="customerWhatsapp" class="form-control" placeholder="+91 9876543210"
+                            required>
                     </div>
 
                     <% if (!isFree) { %>
                         <div class="gateway-selection mt-2 mb-2">
-                            <p class="mb-1 text-sm font-semibold text-light uppercase" style="letter-spacing: 0.05em;">
+                            <p class="form-label uppercase text-sm"
+                                style="letter-spacing: 0.05em; color: #94a3b8; font-size: 0.8rem; margin-top: 2rem;">
                                 Payment Method</p>
-
-                            <style>
-                                .gateway-option {
-                                    display: flex;
-                                    align-items: center;
-                                    padding: 1rem;
-                                    border: 1px solid var(--border-color);
-                                    border-radius: var(--radius-sm);
-                                    margin-bottom: 0.75rem;
-                                    cursor: pointer;
-                                    transition: all 0.2s;
-                                }
-
-                                .gateway-option:hover {
-                                    border-color: var(--primary-light);
-                                    background: #f8fafc;
-                                }
-
-                                .gateway-option.selected {
-                                    border-color: var(--primary-color);
-                                    background: #eff6ff;
-                                    box-shadow: 0 0 0 1px var(--primary-color);
-                                }
-
-                                .gateway-radio {
-                                    margin-right: 1rem;
-                                    accent-color: var(--primary-color);
-                                    transform: scale(1.2);
-                                }
-                            </style>
 
                             <div class="gateway-option selected" onclick="selectGateway('razorpay')">
                                 <input type="radio" id="razorpay" name="gateway" value="razorpay" checked
                                     class="gateway-radio">
                                 <div>
                                     <label for="razorpay"
-                                        style="margin: 0; cursor: pointer; font-weight: 600;">Razorpay</label>
-                                    <div class="text-sm text-light">Cards, UPI, NetBanking</div>
+                                        style="margin: 0; cursor: pointer; font-weight: 600; font-size: 1.05rem; display: block; color: var(--text-color);">Razorpay</label>
+                                    <div class="text-sm text-light">UPI, Cards, NetBanking, Wallets</div>
                                 </div>
                             </div>
 
                             <div class="gateway-option" onclick="selectGateway('payu')">
                                 <input type="radio" id="payu" name="gateway" value="payu" class="gateway-radio">
                                 <div>
-                                    <label for="payu" style="margin: 0; cursor: pointer; font-weight: 600;">PayU</label>
-                                    <div class="text-sm text-light">Secure Checkout</div>
+                                    <label for="payu"
+                                        style="margin: 0; cursor: pointer; font-weight: 600; font-size: 1.05rem; display: block; color: var(--text-color);">PayU</label>
+                                    <div class="text-sm text-light">International & Secure Checkout</div>
                                 </div>
                             </div>
                         </div>
                         <% } %>
 
-                            <button id="rzp-button1" class="btn btn-primary w-full"
-                                style="font-size: 1.1rem; padding: 1rem; margin-top: 1rem;">Confirm & Pay</button>
+                            <button id="rzp-button1" class="btn-pay">Confirm & Pay</button>
 
-                            <div class="mt-1 text-center text-sm text-light">
-                                <span style="opacity: 0.7;">🔒 Secure Payment Processing</span>
+                            <div class="mt-1 text-center text-sm text-light" style="margin-top: 1rem;">
+                                <span
+                                    style="opacity: 0.8; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                    🔒 SSL Secured Payment
+                                </span>
                             </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
+        // Toast Function
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            let icon = 'ℹ️';
+            if (type === 'success') icon = '✅';
+            if (type === 'error') icon = '⚠️';
+
+            toast.innerHTML = `<span>${icon}</span><span class="toast-message">${message}</span>`;
+
+            container.appendChild(toast);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease-in forwards';
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
         let selectedCurrency = 'INR';
 
         function selectCurrency(currency) {
@@ -227,6 +408,13 @@
         function updateButtonText() {
             const gateway = document.querySelector('input[name="gateway"]:checked')?.value;
             const btn = document.getElementById('rzp-button1');
+            const isFreeBooking = <%= isFree ? 'true' : 'false' %>; // Get isFree from server render
+
+            if (isFreeBooking) {
+                btn.innerText = 'Confirm Booking';
+                return;
+            }
+
             if (gateway === 'payu') {
                 btn.innerText = 'Pay with PayU';
             } else {
@@ -238,6 +426,7 @@
             btn.innerText = text;
             btn.disabled = false;
             btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
         }
 
         document.getElementById('rzp-button1').onclick = async function (e) {
@@ -248,7 +437,7 @@
             const whatsapp = document.getElementById('customerWhatsapp').value;
 
             if (!name || !email || !whatsapp) {
-                alert('Please fill in all details (Name, Email, WhatsApp Number)');
+                showToast('Please fill in all details (Name, Email, WhatsApp Number)', 'error');
                 return;
             }
 
@@ -259,6 +448,7 @@
             btn.innerText = 'Processing...';
             btn.disabled = true;
             btn.style.opacity = '0.7';
+            btn.style.cursor = 'wait';
 
             const payload = {
                 hostId: '<%= host._id %>',
@@ -282,7 +472,7 @@
                     const data = await res.json();
 
                     if (data.error) {
-                        alert(data.error);
+                        showToast(data.error, 'error');
                         resetButton(btn, originalText);
                         return;
                     }
@@ -302,12 +492,13 @@
                         }
 
                         document.body.appendChild(form);
+                        showToast('Redirecting to PayU...', 'success');
                         form.submit();
                         return; // Done
                     }
 
                 } else {
-                    // --- RAZORPAY FLOW ---
+                    // --- RAZORPAY / FREE FLOW ---
                     const res = await fetch('/bookings/create-order', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -317,13 +508,16 @@
                     const data = await res.json();
 
                     if (data.error) {
-                        alert(data.error);
+                        showToast(data.error, 'error');
                         resetButton(btn, originalText);
                         return;
                     }
 
                     if (data.isFree) {
-                        window.location.href = '/bookings/success';
+                        showToast('Booking Confirmed!', 'success');
+                        setTimeout(() => {
+                            window.location.href = '/bookings/success';
+                        }, 1000);
                         return;
                     }
 
@@ -334,13 +528,8 @@
                         "name": "Gurubrahma",
                         "description": "Session Booking",
                         "order_id": data.order.id,
-
-                        // ✅ redirect: true — Razorpay redirects to callback_url
-                        // for ALL payment methods: UPI QR, mobile, cards, netbanking
-                        // This is more reliable than the handler for external payments
                         "redirect": true,
                         "callback_url": window.location.origin + "/bookings/verify-payment-redirect?booking_id=" + data.bookingId,
-
                         "prefill": {
                             "name": name,
                             "email": email,
@@ -350,6 +539,7 @@
                         "modal": {
                             "ondismiss": function () {
                                 resetButton(btn, originalText);
+                                showToast('Payment cancelled', 'info');
                             }
                         }
                     };
@@ -359,7 +549,7 @@
 
             } catch (err) {
                 console.error(err);
-                alert('An error occurred. Please try again.');
+                showToast('An unexpected error occurred. Please try again.', 'error');
                 resetButton(btn, originalText);
             }
         }
