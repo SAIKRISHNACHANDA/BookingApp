@@ -95,17 +95,16 @@
         .day {
             aspect-ratio: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 1rem;
-            color: #334155;
+            font-size: 0.95rem;
+            color: #94a3b8;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             margin: 2px;
-            background: #ffffff;
+            background: transparent;
             border: 2px solid transparent;
         }
 
@@ -114,7 +113,6 @@
         }
 
         .day.available {
-            background-color: #f8fafc !important;
             color: #1e293b !important;
             font-weight: 600;
         }
@@ -143,7 +141,7 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 2px solid #cbd5e1;
+            border: 2px solid #e2e8f0;
             box-sizing: border-box;
             pointer-events: none;
         }
@@ -165,9 +163,8 @@
         }
 
         .day:hover:not(.empty):not(.disabled):not(.selected) {
-            background-color: #eff6ff;
-            border-color: transparent;
-            color: #4f46e5;
+            background-color: #f1f5f9;
+            color: #0f172a;
             transform: scale(1.05);
             z-index: 5;
         }
@@ -216,27 +213,31 @@
 
         .time-slots {
             padding-left: 3rem;
-            border-left: 1px solid #f1f5f9;
+            border-left: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
         }
 
         .slots-header {
-            font-weight: 600;
-            margin-bottom: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
             color: #0f172a;
-            font-size: 1.25rem;
+            font-size: 1.15rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .slot-btn {
             width: 100%;
             padding: 1rem;
-            border: 2px solid #e2e8f0;
+            border: 1px solid #cbd5e1;
             background: white;
-            color: #1e293b;
+            color: #334155;
             border-radius: 12px;
             margin-bottom: 0.85rem;
             cursor: pointer;
-            font-weight: 700;
-            font-size: 1rem;
+            font-weight: 600;
+            font-size: 0.95rem;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
         }
