@@ -1,60 +1,130 @@
 <%- include('partials/header') %>
 
     <style>
-        .host-profile-header {
-            text-align: center;
-            padding: 1.5rem 1rem;
-            max-width: 800px;
-            margin: 0 auto;
+        body {
+            background-color: #f8fafc;
+            /* Very soft sophisticated background */
         }
 
-        .host-profile-header h1 {
-            font-size: 2.25rem;
-            color: #1e293b;
-            margin-bottom: 0.25rem;
-        }
-
-        .host-profile-header p {
-            color: #64748b;
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-
-        .calendar-card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e2e8f0;
-            padding: 1.75rem 2rem;
-            max-width: 900px;
-            margin: 0 auto 2rem;
+        .booking-page-wrapper {
+            padding: 4rem 1rem 5rem;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            position: relative;
+            min-height: calc(100vh - 80px);
+        }
+
+        .booking-widget {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            max-width: 1080px;
+            width: 100%;
+            display: flex;
+            overflow: hidden;
+            min-height: 560px;
+        }
+
+        .host-info-sidebar {
+            width: 320px;
+            background: #ffffff;
+            border-right: 1px solid #f1f5f9;
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .host-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.25);
+        }
+
+        .host-name {
+            font-size: 1.5rem;
+            color: #0f172a;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .host-bio {
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .session-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            color: #475569;
+            font-weight: 500;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+        }
+
+        .session-icon {
+            color: #4f46e5;
+            background: #eff6ff;
+            padding: 0.5rem;
+            border-radius: 8px;
+            display: flex;
+        }
+
+        .booking-content {
+            flex: 1;
+            padding: 2.5rem 3rem;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+        }
+
+        .calendar-layout {
+            display: flex;
+            gap: 3.5rem;
+            flex: 1;
+        }
+
+        .calendar-left {
+            flex: 1.2;
+            max-width: 380px;
         }
 
         .calendar-header {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            gap: 2rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .calendar-header h2 {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             color: #0f172a;
             font-weight: 600;
-            min-width: 180px;
             text-align: center;
         }
 
         .nav-btn {
-            background: #f8fafc;
+            background: #ffffff;
             border: 1px solid #e2e8f0;
             cursor: pointer;
             color: #64748b;
             font-size: 1rem;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -64,7 +134,7 @@
         }
 
         .nav-btn:hover {
-            background: #f1f5f9;
+            background: #f8fafc;
             border-color: #cbd5e1;
             color: #0f172a;
             transform: scale(1.05);
@@ -87,8 +157,8 @@
         }
 
         .day {
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -100,7 +170,7 @@
             transition: all 0.2s ease;
             position: relative;
             background: transparent;
-            border: 1px solid transparent;
+            border: 2px solid transparent;
         }
 
         .day.empty {
@@ -150,78 +220,32 @@
             display: none;
         }
 
-        .day:hover:not(.empty):not(.disabled):not(.selected) {
-            border-color: transparent;
-            background-color: #f1f5f9;
-            transform: scale(1.05);
-            z-index: 5;
-        }
-
-        /* Custom Tooltip */
-        .day[data-slots]:hover::before {
-            content: attr(data-slots) ' slots available';
-            position: absolute;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1e293b;
-            color: #fff;
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            z-index: 20;
-            pointer-events: none;
-            opacity: 0;
-            animation: tooltip-fade 0.2s ease-out forwards;
-        }
-
-        @keyframes tooltip-fade {
-            0% {
-                opacity: 0;
-                transform: translateX(-50%) translateY(5px);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
-        }
-
-        .day.disabled {
-            opacity: 1;
-            color: #cbd5e1;
-            background: transparent;
-            cursor: default;
-            border: 2px solid transparent;
-            pointer-events: none;
-        }
-
         .time-slots {
-            padding-left: 3rem;
-            border-left: 1px solid #e2e8f0;
+            flex: 1;
+            padding-left: 2rem;
+            border-left: 1px solid #f1f5f9;
             display: flex;
             flex-direction: column;
         }
 
         .slots-header {
-            font-weight: 700;
-            margin-bottom: 1rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
             color: #0f172a;
             font-size: 1.15rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         #slotsList {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 0.75rem;
-            max-height: 320px;
+            gap: 0.85rem;
+            max-height: 380px;
             overflow-y: auto;
-            padding: 4px;
-            margin: -4px;
+            padding-right: 8px;
+            margin-right: -8px;
         }
 
         #slotsList::-webkit-scrollbar {
@@ -235,99 +259,82 @@
 
         .slot-btn {
             width: 100%;
-            padding: 0.95rem;
+            padding: 1rem;
             border: 1px solid #c7d2fe;
             background: white;
             color: #4f46e5;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
             font-size: 0.95rem;
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .slot-btn:hover {
             border-color: #4f46e5;
-            color: #4f46e5;
-            background: #eff6ff;
+            background: #4f46e5;
+            color: white;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+            box-shadow: 0 8px 16px rgba(79, 70, 229, 0.15);
         }
 
         .timezone-footer {
-            margin-top: 1.5rem;
+            margin-top: 2.5rem;
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            color: #475569;
-            font-size: 0.9rem;
+            color: #64748b;
+            font-size: 0.85rem;
             font-weight: 500;
+            padding-top: 1.5rem;
+            border-top: 1px solid #f1f5f9;
         }
 
         .globe-icon {
-            color: #1e293b;
-            font-size: 1.25rem;
+            color: #94a3b8;
+            font-size: 1.1rem;
         }
 
-        .calendar-layout {
-            grid-template-columns: 1.2fr 1fr;
-            gap: 2rem;
-        }
-
-        .calendar-left {
-            padding-right: 2rem;
-        }
-
-        @media (max-width: 768px) {
-            .host-profile-header {
-                padding: 2rem 1rem;
-            }
-
-            .host-profile-header h1 {
-                font-size: 1.75rem;
-            }
-
-            .calendar-card {
+        @media (max-width: 900px) {
+            .booking-page-wrapper {
                 padding: 1rem;
-                margin-bottom: 3rem;
+            }
+
+            .booking-widget {
+                flex-direction: column;
+                max-width: 500px;
+            }
+
+            .host-info-sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+                padding: 2rem;
             }
 
             .calendar-layout {
-                grid-template-columns: 1fr;
+                flex-direction: column;
                 gap: 2rem;
             }
 
             .calendar-left {
-                padding-right: 0;
-            }
-
-            .calendar-header {
-                gap: 1rem;
-                margin-bottom: 2rem;
-            }
-
-            .calendar-header h2 {
-                font-size: 1rem;
-                min-width: auto;
-            }
-
-            .day {
-                border-radius: 8px;
-                font-size: 0.9rem;
-            }
-
-            .weekday {
-                font-size: 0.7rem;
-                padding-bottom: 1rem;
+                width: 100%;
+                max-width: none;
             }
 
             .time-slots {
                 padding-left: 0;
                 border-left: none;
-                border-top: 1px solid #f1f5f9;
-                margin-top: 2rem;
-                padding-top: 2rem;
+                padding-top: 0;
+            }
+
+            .booking-content {
+                padding: 2rem;
             }
 
             #bookingSummary {
@@ -339,61 +346,112 @@
         }
     </style>
 
-    <div class="container">
-        <div class="host-profile-header">
-            <h1>
-                <%= host.name %>
-            </h1>
-            <p>
-                <%= host.bio || 'Book a 1:1 session for expert guidance and mentorship.' %>
-            </p>
-        </div>
-
-        <div class="calendar-card">
-            <div class="grid calendar-layout">
-                <!-- Left side: Calendar -->
-                <div class="calendar-left">
-                    <h2
-                        style="margin-bottom: 2rem; font-size: 1.25rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #4f46e5;">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                        Select a Date & Time
-                    </h2>
-
-                    <div class="calendar-header">
-                        <button class="nav-btn" onclick="prevMonth()">❮</button>
-                        <h2 id="monthDisplay">February 2026</h2>
-                        <button class="nav-btn" onclick="nextMonth()">❯</button>
-                    </div>
-
-                    <div class="calendar-grid" id="calendarGrid">
-                        <div class="weekday">MON</div>
-                        <div class="weekday">TUE</div>
-                        <div class="weekday">WED</div>
-                        <div class="weekday">THU</div>
-                        <div class="weekday">FRI</div>
-                        <div class="weekday">SAT</div>
-                        <div class="weekday">SUN</div>
-                        <!-- Days will be injected here -->
-                    </div>
-
-                    <div class="timezone-footer">
-                        <span class="globe-icon">🌐</span>
-                        <strong>Time zone:</strong>
-                        <span id="timezoneText">India Standard Time (4:46pm)</span> ▾
-                    </div>
+    <div class="booking-page-wrapper">
+        <div class="booking-widget">
+            <!-- Left Sidebar: Host Info -->
+            <div class="host-info-sidebar">
+                <div class="host-avatar">
+                    <%= host.name.charAt(0).toUpperCase() %>
                 </div>
+                <h1 class="host-name">
+                    <%= host.name %>
+                </h1>
+                <p class="host-bio">
+                    <%= host.bio
+                        || 'Book a 1:1 session for expert guidance, in-depth reviews, and professional mentorship.' %>
+                </p>
 
-                <!-- Right side: Slots -->
-                <div id="slotsContainer" class="time-slots">
-                    <div id="selectedDateLabel" class="slots-header">Available Slots</div>
-                    <div id="slotsList">
-                        <p class="text-light">Select a date to view available times.</p>
+                <div class="session-detail-item">
+                    <div class="session-icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <span>30 Minute Session</span>
+                </div>
+                <div class="session-detail-item">
+                    <div class="session-icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M15.6 11.6L22 7v10l-6.4-4.5v-1zM4 5h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7c0-1.1.9-2 2-2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <span>Video Meeting</span>
+                </div>
+                <div class="session-detail-item">
+                    <div class="session-icon">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <span>
+                        <%= host.hourlyRate ? (host.currency || 'INR' ) + ' ' + (host.hourlyRate/(60/30)) : 'Free' %>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Right Content: Calendar & Slots -->
+            <div class="booking-content">
+                <h2 style="font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 2rem;">Select a Date &
+                    Time</h2>
+
+                <div class="calendar-layout">
+                    <!-- Calendar -->
+                    <div class="calendar-left">
+                        <div class="calendar-header">
+                            <button class="nav-btn" onclick="prevMonth()">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="15 18 9 12 15 6"></polyline>
+                                </svg>
+                            </button>
+                            <h2 id="monthDisplay">February 2026</h2>
+                            <button class="nav-btn" onclick="nextMonth()">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="calendar-grid" id="calendarGrid">
+                            <div class="weekday">MON</div>
+                            <div class="weekday">TUE</div>
+                            <div class="weekday">WED</div>
+                            <div class="weekday">THU</div>
+                            <div class="weekday">FRI</div>
+                            <div class="weekday">SAT</div>
+                            <div class="weekday">SUN</div>
+                            <!-- Days will be injected here -->
+                        </div>
+
+                        <div class="timezone-footer">
+                            <svg class="globe-icon" width="16" height="16" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path
+                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+                                </path>
+                            </svg>
+                            <span id="timezoneText">India Standard Time (4:46pm)</span>
+                        </div>
+                    </div>
+
+                    <!-- Slots -->
+                    <div id="slotsContainer" class="time-slots">
+                        <div id="selectedDateLabel" class="slots-header">
+                            Available Slots
+                        </div>
+                        <div id="slotsList">
+                            <p style="color: #64748b; font-size: 0.95rem;">Select a date to view times.</p>
+                        </div>
                     </div>
                 </div>
             </div>
