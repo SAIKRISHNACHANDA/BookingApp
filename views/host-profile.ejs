@@ -117,20 +117,9 @@
         }
 
         .day.available {
-            color: #1e293b !important;
+            color: #4f46e5 !important;
             font-weight: 600;
-        }
-
-        .day.available::after {
-            content: '';
-            position: absolute;
-            bottom: 6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 4px;
-            background-color: #4f46e5;
-            border-radius: 50%;
+            background: #eff6ff !important;
         }
 
         .day.today {
@@ -141,9 +130,10 @@
         .day.today::before {
             content: '';
             position: absolute;
-            top: 0;
-            width: 100%;
-            height: 100%;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
             border-radius: 50%;
             border: 2px solid #e2e8f0;
             box-sizing: border-box;
@@ -232,32 +222,32 @@
 
         #slotsList {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            grid-template-columns: 1fr;
             gap: 0.75rem;
-            max-height: 380px;
+            max-height: 400px;
             overflow-y: auto;
             padding-right: 0.5rem;
         }
 
         #slotsList::-webkit-scrollbar {
-            width: 6px;
+            width: 4px;
         }
 
         #slotsList::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 6px;
+            background: #e2e8f0;
+            border-radius: 4px;
         }
 
         .slot-btn {
             width: 100%;
-            padding: 0.85rem;
+            padding: 1rem;
             border: 1px solid #cbd5e1;
             background: white;
-            color: #334155;
-            border-radius: 12px;
+            color: #1e293b;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 1rem;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
         }
