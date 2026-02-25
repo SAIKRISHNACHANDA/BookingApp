@@ -380,6 +380,7 @@
                                                             data-name="<%= booking.customer.name %>"
                                                             data-time="<%= bookingTimeStr %>"
                                                             data-whatsapp="<%= booking.customer.whatsapp || '' %>"
+                                                            data-meetlink="<%= booking.meetingLink || '' %>"
                                                             style="padding: 0.25rem 0.5rem; font-size: 0.875rem;">
                                                             📧 Message
                                                         </button>
@@ -444,6 +445,7 @@
                             <input type="hidden" id="modalCustomerEmail" name="customerEmail">
                             <input type="hidden" id="modalBookingTime">
                             <input type="hidden" id="modalCustomerWhatsapp">
+                            <input type="hidden" id="modalMeetLink">
                             <div class="form-group">
                                 <label>To</label>
                                 <input type="text" id="modalCustomerName" readonly style="background: #f3f4f6;">
@@ -818,7 +820,8 @@
                         btn.dataset.email,
                         btn.dataset.name,
                         btn.dataset.time,
-                        btn.dataset.whatsapp
+                        btn.dataset.whatsapp,
+                        btn.dataset.meetlink
                     );
                 });
             });
@@ -831,11 +834,12 @@
         }
 
         // Email Modal Functions
-        function openEmailModal(email, name, bookingTime, whatsapp) {
+        function openEmailModal(email, name, bookingTime, whatsapp, meetLink) {
             document.getElementById('modalCustomerEmail').value = email;
             document.getElementById('modalCustomerName').value = name + ' <' + email + '>';
             document.getElementById('modalBookingTime').value = bookingTime || '';
             document.getElementById('modalCustomerWhatsapp').value = whatsapp || '';
+            document.getElementById('modalMeetLink').value = meetLink || '';
             document.getElementById('modalSubject').value = 'Regarding your upcoming session';
             document.getElementById('modalMessage').value = '';
             document.getElementById('emailModal').style.display = 'block';
@@ -868,8 +872,8 @@
                     message: `Hi ${name},\n\nThank you for our session! I hope you found it valuable.\n\nIf you have any questions based on what we discussed, or would like to book another session, feel free to reach out anytime.\n\nLooking forward to connecting again!\n\nBest regards,\n${hostName}`
                 },
                 link: {
-                    subject: '🔗 Meeting Link for Your Session',
-                    message: `Hi ${name},\n\nHere is the meeting link for your upcoming session on ${time}:\n\n🔗 [Paste your meeting link here]\n\nPlease click the link a few minutes before the session starts. Let me know if you have any issues accessing it.\n\nSee you soon!\n\nBest regards,\n${hostName}`
+                    subject: '🔗 Secure Video Meet Link for Your Session',
+                    message: `Hi ${name},\n\nHere is your official Google Meet link for our upcoming session on ${time}:\n\n🔗 ${document.getElementById('modalMeetLink').value || '[Generate a Meet Link via the Calendar first]'}\n\nPlease click the link a few minutes before the session starts so we can begin on time. Let me know if you have any issues accessing it.\n\nSee you soon!\n\nBest regards,\n${hostName}`
                 }
             };
             const t = templates[type];
