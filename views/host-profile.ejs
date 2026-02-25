@@ -22,13 +22,24 @@
 
         .calendar-card {
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.02);
             padding: 3rem;
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto 5rem;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            border: 1px solid #f1f5f9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .calendar-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
         }
 
         .calendar-header {
@@ -87,7 +98,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
+            border-radius: 50%;
             cursor: pointer;
             font-size: 1rem;
             color: #334155;
@@ -95,7 +106,7 @@
             position: relative;
             margin: 2px;
             background: #ffffff;
-            border: 1px solid transparent;
+            border: 2px solid transparent;
         }
 
         .day.empty {
@@ -103,10 +114,9 @@
         }
 
         .day.available {
-            background-color: #eff6ff !important;
-            color: #1e3a8a !important;
-            font-weight: 700;
-            border: 1px solid #bfdbfe !important;
+            background-color: #f8fafc !important;
+            color: #1e293b !important;
+            font-weight: 600;
         }
 
         .day.available::after {
@@ -115,37 +125,51 @@
             bottom: 6px;
             left: 50%;
             transform: translateX(-50%);
-            width: 5px;
-            height: 5px;
-            background-color: #3b82f6;
+            width: 4px;
+            height: 4px;
+            background-color: #4f46e5;
             border-radius: 50%;
         }
 
         .day.today {
-            border: 2px solid #64748b;
-            color: #0f172a;
+            color: #4f46e5;
             font-weight: 700;
         }
 
+        .day.today::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+
         .day.selected {
-            background-color: #2563eb !important;
+            background-color: #4f46e5 !important;
             color: white !important;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+            box-shadow: 0 8px 16px -4px rgba(79, 70, 229, 0.4);
             transform: scale(1.05);
             z-index: 10;
-            border-color: #2563eb !important;
         }
 
         .day.selected::after {
             background-color: white !important;
         }
 
+        .day.selected.today::before {
+            display: none;
+        }
+
         .day:hover:not(.empty):not(.disabled):not(.selected) {
-            background-color: #f8fafc;
-            border-color: #cbd5e1;
-            transform: translateY(-1px);
+            background-color: #eff6ff;
+            border-color: transparent;
+            color: #4f46e5;
+            transform: scale(1.05);
             z-index: 5;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
 
         /* Custom Tooltip */
@@ -204,22 +228,25 @@
 
         .slot-btn {
             width: 100%;
-            padding: 0.85rem;
-            border: 1px solid #2563eb;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
             background: white;
-            color: #2563eb;
-            border-radius: 8px;
-            margin-bottom: 1rem;
+            color: #1e293b;
+            border-radius: 12px;
+            margin-bottom: 0.85rem;
             cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
         }
 
         .slot-btn:hover {
-            background: #2563eb;
-            color: white;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            border-color: #4f46e5;
+            background: #eff6ff;
+            color: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
         }
 
         .timezone-footer {
@@ -320,8 +347,17 @@
             <div class="grid calendar-layout">
                 <!-- Left side: Calendar -->
                 <div class="calendar-left">
-                    <h2 style="margin-bottom: 2rem; font-size: 1.5rem; color: #0f172a; font-weight: 700;">Select a Date
-                        & Time</h2>
+                    <h2
+                        style="margin-bottom: 2rem; font-size: 1.25rem; color: #1e293b; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #4f46e5;">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        Select a Date & Time
+                    </h2>
 
                     <div class="calendar-header">
                         <button class="nav-btn" onclick="prevMonth()">❮</button>
