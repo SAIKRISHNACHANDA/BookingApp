@@ -136,25 +136,27 @@ async function findMatchingAvailability(hostId, startTime) {
     const dayOfWeek = date.getDay();
     const startTimeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
 
-    // Check for specific date rule first
-    let rule = await Availability.findOne({
-        host: hostId,
-        specificDate: { $ne: null }
+    // Create an exact YYYY-MM-DD string
+    const targetDateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+
+    // Find ALL rules for this host
+    const allRules = await Availability.find({ host: hostId });
+
+    // 1. Check for specific date rule matches targeting this exactly
+    let rule = allRules.find(r => {
+        if (!r.specificDate) return false;
+        const ruleDateStr = new Date(r.specificDate).toISOString().split('T')[0];
+        return ruleDateStr === targetDateStr && r.startTime <= startTimeStr && r.endTime > startTimeStr;
     });
 
-    if (rule && rule.specificDate) {
-        const ruleDate = new Date(rule.specificDate).toISOString().split('T')[0];
-        const targetDate = date.toISOString().split('T')[0];
-        if (ruleDate !== targetDate) rule = null; // Reset if date doesn't match
-    }
-
+    // 2. Fallback to recurring rule matching day of week
     if (!rule) {
-        // Check for recurring rule
-        rule = await Availability.findOne({
-            host: hostId,
-            dayOfWeek: dayOfWeek,
-            specificDate: null
-        });
+        rule = allRules.find(r =>
+            !r.specificDate &&
+            r.dayOfWeek === dayOfWeek &&
+            r.startTime <= startTimeStr &&
+            r.endTime > startTimeStr
+        );
     }
 
     return rule;
