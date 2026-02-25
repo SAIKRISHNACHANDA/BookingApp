@@ -143,12 +143,35 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .nav-links-center {
-                display: none;
+            .nav-wrapper {
+                padding: 0 0.75rem;
             }
 
             .nav-pill {
-                padding: 0.4rem 0.6rem;
+                padding: 0.5rem 0.75rem;
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .nav-links-center,
+            .nav-divider,
+            .nav-user-info {
+                display: none;
+            }
+
+            .nav-logo {
+                font-size: 1.2rem;
+                padding: 0.3rem 0.5rem;
+            }
+
+            .nav-btn-ghost,
+            .nav-btn-primary {
+                padding: 0.4rem 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            .nav-actions {
+                gap: 0.4rem;
             }
         }
     </style>
