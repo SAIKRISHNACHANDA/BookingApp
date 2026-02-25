@@ -4,16 +4,23 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const bufferManager = require('../utils/bufferManager');
 
-// Initialize Razorpay instances for different currencies
-const instanceInr = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID, // Default/INR Key
-    key_secret: process.env.RAZORPAY_KEY_SECRET
-});
+// Lazy Razorpay initialization — only creates instance when needed
+// Prevents server crash if keys are not in .env
+function getRazorpayInstance(currency = 'INR') {
+    const keyId = currency === 'USD'
+        ? (process.env.RAZORPAY_KEY_ID_USD || process.env.RAZORPAY_KEY_ID)
+        : process.env.RAZORPAY_KEY_ID;
 
-const instanceUsd = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID_USD || process.env.RAZORPAY_KEY_ID, // Fallback or USD Key
-    key_secret: process.env.RAZORPAY_KEY_SECRET_USD || process.env.RAZORPAY_KEY_SECRET
-});
+    const keySecret = currency === 'USD'
+        ? (process.env.RAZORPAY_KEY_SECRET_USD || process.env.RAZORPAY_KEY_SECRET)
+        : process.env.RAZORPAY_KEY_SECRET;
+
+    if (!keyId || !keySecret) {
+        throw new Error('Razorpay keys not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env');
+    }
+
+    return new Razorpay({ key_id: keyId, key_secret: keySecret });
+}
 
 exports.getBookingPage = async (req, res) => {
     try {
@@ -97,24 +104,20 @@ exports.createBookingOrder = async (req, res) => {
     // Force 1 unit (Rupee/USD) for testing "everywhere" as requested
     let amount = 1;
     let selectedCurrency = 'INR';
-    let instance = instanceInr;
-    let key_id = process.env.RAZORPAY_KEY_ID;
 
     if (!isFree) {
         if (currency === 'USD') {
-            // amount = rule.priceUsd || 0; // Commented out for testing
             amount = 1; // Force 1 USD
             selectedCurrency = 'USD';
-            instance = instanceUsd;
-            key_id = process.env.RAZORPAY_KEY_ID_USD;
         } else {
-            // amount = rule.price || 0; // Commented out for testing
             amount = 1; // Force 1 INR
             selectedCurrency = 'INR';
-            instance = instanceInr;
-            key_id = process.env.RAZORPAY_KEY_ID;
         }
     }
+
+    const key_id = selectedCurrency === 'USD'
+        ? (process.env.RAZORPAY_KEY_ID_USD || process.env.RAZORPAY_KEY_ID)
+        : process.env.RAZORPAY_KEY_ID;
 
     // Log Payment Start Analytics
     const Analytics = require('../models/Analytics');
@@ -175,6 +178,7 @@ exports.createBookingOrder = async (req, res) => {
     console.log(`[createBookingOrder] Razorpay options:`, options);
 
     try {
+        const instance = getRazorpayInstance(selectedCurrency);
         const order = await instance.orders.create(options);
         console.log(`[createBookingOrder] Razorpay order created: ${order.id}`);
 
