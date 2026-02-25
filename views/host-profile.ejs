@@ -7,12 +7,42 @@
         }
 
         .booking-page-wrapper {
-            padding: 4rem 1rem 5rem;
+            padding: 2rem 1rem 5rem;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
+            align-items: center;
+            /* keep centered but need flex-col */
+            flex-direction: column;
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             min-height: calc(100vh - 80px);
+            gap: 1.5rem;
+        }
+
+        .booking-nav-header {
+            max-width: 1080px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .floating-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #64748b;
+            font-weight: 500;
+            font-size: 0.95rem;
+            text-decoration: none;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+            margin-left: -0.75rem;
+            /* align optically */
+        }
+
+        .floating-back-btn:hover {
+            color: #0f172a;
+            background: #f1f5f9;
         }
 
         .booking-widget {
@@ -347,6 +377,16 @@
     </style>
 
     <div class="booking-page-wrapper">
+        <div class="booking-nav-header">
+            <a href="/dashboard" class="floating-back-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
         <div class="booking-widget">
             <!-- Left Sidebar: Host Info -->
             <div class="host-info-sidebar">
