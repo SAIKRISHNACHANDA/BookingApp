@@ -394,8 +394,7 @@
                                             <%= host.hourlyRate %>
                                     </span>
                                 </div>
-                                <a href="/hosts/<%= host.username %>" class="btn-book">Book Now</a>
-                            </div>
+<a href="/bookings/checkout?host=<%= host._id %>" class="btn-book">Book Now</a>                            </div>
                         </div>
                     </div>
                     <% }) %>
@@ -679,9 +678,14 @@
                     style="font-size: 1rem; color: rgba(203,213,225,0.75); margin-bottom: 2.5rem; line-height: 1.8; max-width: 520px; margin-left: auto; margin-right: auto;">
                     Join thousands of professionals leveling up their skills with expert-led 1:1 sessions.
                 </p>
-                <div class="cta-btn-container">
-                    <a href="/signup" class="cta-btn-primary">Book a Session</a>
-                    <a href="/signup" class="cta-btn-secondary">Become a Host →</a>
+               <div class="cta-btn-container">
+                    <% if (typeof user !== 'undefined' && user) { %>
+                        <a href="/checkout" class="cta-btn-primary">Book a Session</a>
+                        <a href="/hosts/apply" class="cta-btn-secondary">Become a Host →</a>
+                    <% } else { %>
+                        <a href="/signup" class="cta-btn-primary">Book a Session</a>
+                        <a href="/signup" class="cta-btn-secondary">Become a Host →</a>
+                    <% } %>
                 </div>
             </div>
         </div>

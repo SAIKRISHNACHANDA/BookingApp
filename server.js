@@ -1,3 +1,4 @@
+//File : - / server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
@@ -20,6 +21,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/bookings', require('./routes/bookingRoutes'));
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
