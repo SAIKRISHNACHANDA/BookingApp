@@ -2,9 +2,11 @@ const { google } = require('googleapis');
 const User = require('../models/User');
 
 const getOAuth2Client = (req) => {
-    let baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    let baseUrl;
     if (req) {
         baseUrl = req.protocol + '://' + req.get('host');
+    } else {
+        baseUrl = process.env.BASE_URL || '';
     }
     return new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
