@@ -4,12 +4,14 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const morgan = require('morgan');
+const logger = require('./utils/logger');
 const path = require('path');
 const session = require('express-session');
 
 // Load env FIRST before any module that reads process.env
 dotenv.config();
-console.log('Loaded MONGODB_URI:', process.env.MONGODB_URI);
+logger.info('Loaded MONGODB_URI: ' + process.env.MONGODB_URI);
 
 const passport = require('./config/passport');
 
@@ -21,6 +23,9 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// HTTP Request Logging
+app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
@@ -40,8 +45,8 @@ mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
-    .then(() => console.log('MongoDB Connected'))
-    .catch(err => console.log(err));
+    .then(() => logger.info('MongoDB Connected'))
+    .catch(err => logger.error('MongoDB connection error: ' + err));
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
@@ -64,7 +69,7 @@ app.get('/', async (req, res) => {
         const hosts = await User.find({ role: 'host' }).select('name email hourlyRate currency username');
         res.render('index', { title: 'Welcome', user: req.session?.user, hosts });
     } catch (err) {
-        console.error(err);
+        logger.error(err);
         res.status(500).send(`Server Error: ${err.message}`);
     }
 });
@@ -77,6 +82,6 @@ app.listen(PORT, () => {
     const bufferManager = require('./utils/bufferManager');
     setInterval(async () => {
         const deleted = await bufferManager.cleanupExpiredLocks();
-        if (deleted > 0) console.log(`[BufferManager] Cleaned up ${deleted} expired locks`);
+        if (deleted > 0) logger.info(`[BufferManager] Cleaned up ${deleted} expired locks`);
     }, 5 * 60 * 1000);
 });
