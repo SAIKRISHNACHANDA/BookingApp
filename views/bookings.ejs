@@ -1,0 +1,412 @@
+<!-- cspell:ignore payu upi vpa -->
+<%- include('partials/header') %>
+
+<section class="container fade-in" style="max-width: 900px; margin: 2rem auto 3rem;">
+    <style>
+        .panel {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1.25rem;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0 0 0.35rem;
+            color: #0f172a;
+        }
+
+        .muted {
+            color: #64748b;
+            font-size: 0.95rem;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .field label {
+            font-size: 0.9rem;
+            color: #334155;
+            font-weight: 600;
+        }
+
+        .field input,
+        .field select {
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 0.7rem 0.8rem;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14);
+        }
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.55rem;
+            margin-top: 0.6rem;
+        }
+
+        .slot-btn {
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: #fff;
+            color: #0f172a;
+            padding: 0.55rem 0.5rem;
+            font-size: 0.88rem;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .slot-btn:hover {
+            border-color: #6366f1;
+            color: #3730a3;
+        }
+
+        .slot-btn.active {
+            background: #4f46e5;
+            color: #fff;
+            border-color: #4f46e5;
+        }
+
+        .summary-box {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 0.9rem;
+            margin-top: 0.8rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.92rem;
+        }
+
+        .summary-row:last-child {
+            margin-bottom: 0;
+            padding-top: 0.55rem;
+            border-top: 1px solid #cbd5e1;
+            font-weight: 700;
+        }
+
+        .book-cta {
+            width: 100%;
+            margin-top: 0.9rem;
+            border: none;
+            border-radius: 10px;
+            background: #4f46e5;
+            color: #fff;
+            font-weight: 700;
+            padding: 0.75rem;
+            cursor: pointer;
+        }
+
+        .book-cta:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .form-note {
+            margin-top: 0.7rem;
+            font-size: 0.9rem;
+            color: #334155;
+            min-height: 1.3rem;
+        }
+
+        .qr-box {
+            margin-top: 0.9rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.9rem;
+            background: #f8fafc;
+            display: none;
+        }
+
+        .qr-wrap {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .qr-wrap img {
+            width: 170px;
+            height: 170px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+        }
+
+        .qr-meta {
+            font-size: 0.9rem;
+            color: #334155;
+        }
+
+        .qr-link {
+            margin-top: 0.6rem;
+            display: inline-block;
+            color: #4338ca;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+    </style>
+
+    <div style="margin-bottom: 1.2rem;">
+        <h1 style="font-size: 2rem; margin-bottom: 0.35rem;">Book Appointment</h1>
+        <p class="muted">Select date, time and payment gateway. Host is assigned automatically.</p>
+    </div>
+
+    <div
+        class="panel"
+        id="bookingPanel"
+        data-is-logged-in="<%= (typeof user !== 'undefined' && user) ? 'true' : 'false' %>"
+        data-assigned-host-id="<%= defaultHost ? defaultHost._id : '' %>"
+        data-assigned-rate="<%= defaultHost ? (defaultHost.hourlyRate || 0) : 0 %>"
+        data-assigned-currency="<%= defaultHost ? (defaultHost.currency || 'INR') : 'INR' %>"
+        data-upi-vpa="<%= upiVpa || '' %>"
+        data-upi-name="<%= upiName || 'Gurubrahma' %>">
+            <h2 class="panel-title">Schedule</h2>
+            <p class="muted">
+                Assigned Host:
+                <strong><%= defaultHost ? defaultHost.name : 'Not assigned yet' %></strong>
+            </p>
+
+            <div class="field" style="margin-top: 1rem;">
+                <label for="bookingDate">Date</label>
+                <input type="date" id="bookingDate">
+            </div>
+
+            <div class="field">
+                <label for="duration">Duration</label>
+                <select id="duration">
+                    <option value="30">30 minutes</option>
+                    <option value="45">45 minutes</option>
+                    <option value="60" selected>60 minutes</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="gateway">Payment Gateway</label>
+                <select id="gateway">
+                    <option value="razorpay" selected>Razorpay</option>
+                    <option value="payu">PayU</option>
+                    <option value="upi_qr">UPI QR</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label>Available Slots</label>
+                <div class="slot-grid" id="slotGrid"></div>
+            </div>
+
+                <div class="summary-box">
+                    <div class="summary-row">
+                        <span>Host</span>
+                    <span><%= defaultHost ? defaultHost.name : 'Not assigned yet' %></span>
+                </div>
+                <div class="summary-row">
+                    <span>Date</span>
+                    <span id="summaryDate">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>Time</span>
+                    <span id="summaryTime">-</span>
+                </div>
+                <div class="summary-row">
+                    <span>Estimated Total</span>
+                    <span id="summaryPrice">-</span>
+                </div>
+            </div>
+
+            <button id="continueBtn" class="book-cta" disabled>Continue to Checkout</button>
+            <p id="formNote" class="form-note"></p>
+
+            <div id="qrBox" class="qr-box">
+                <h3 class="panel-title" style="font-size: 1rem; margin-bottom: 0.75rem;">Scan & Pay</h3>
+                <div class="qr-wrap">
+                    <img id="qrImage" alt="UPI QR Code">
+                    <div class="qr-meta">
+                        <div><strong>VPA:</strong> <span id="qrVpa">-</span></div>
+                        <div><strong>Amount:</strong> <span id="qrAmount">-</span></div>
+                        <div><strong>Ref:</strong> <span id="qrRef">-</span></div>
+                        <a id="upiIntentLink" class="qr-link" href="#" target="_blank" rel="noopener">Open UPI App</a>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <script>
+        (function () {
+            const bookingPanel = document.getElementById('bookingPanel');
+            if (!bookingPanel) return;
+
+            const isLoggedIn = bookingPanel.dataset.isLoggedIn === 'true';
+            const assignedHostId = bookingPanel.dataset.assignedHostId || '';
+            const assignedRate = Number(bookingPanel.dataset.assignedRate || 0);
+            const assignedCurrency = bookingPanel.dataset.assignedCurrency || 'INR';
+            const upiVpa = bookingPanel.dataset.upiVpa || '';
+            const upiName = bookingPanel.dataset.upiName || 'Gurubrahma';
+
+            const dateInput = document.getElementById('bookingDate');
+            const durationSelect = document.getElementById('duration');
+            const gatewaySelect = document.getElementById('gateway');
+            const slotGrid = document.getElementById('slotGrid');
+            const continueBtn = document.getElementById('continueBtn');
+            const formNote = document.getElementById('formNote');
+            const summaryDate = document.getElementById('summaryDate');
+            const summaryTime = document.getElementById('summaryTime');
+            const summaryPrice = document.getElementById('summaryPrice');
+            const qrBox = document.getElementById('qrBox');
+            const qrImage = document.getElementById('qrImage');
+            const qrVpa = document.getElementById('qrVpa');
+            const qrAmount = document.getElementById('qrAmount');
+            const qrRef = document.getElementById('qrRef');
+            const upiIntentLink = document.getElementById('upiIntentLink');
+
+            if (!dateInput || !durationSelect || !gatewaySelect || !slotGrid || !continueBtn) return;
+
+            const slotTimes = ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            dateInput.min = `${yyyy}-${mm}-${dd}`;
+            dateInput.value = dateInput.min;
+
+            let selectedSlot = null;
+
+            function buildUpiData(total) {
+                const ref = `BOOK-${Date.now()}`;
+                const amount = Number(total).toFixed(2);
+                const noteDate = dateInput.value || '';
+                const noteTime = selectedSlot || '';
+                const note = `Session ${noteDate} ${noteTime}`.trim();
+                const uri = `upi://pay?pa=${encodeURIComponent(upiVpa)}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}&tr=${encodeURIComponent(ref)}`;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(uri)}`;
+                return { ref, amount, uri, qrUrl };
+            }
+
+            function updateQr(total) {
+                const gateway = gatewaySelect.value;
+                const qrGatewaySelected = gateway === 'upi_qr' || gateway === 'payu';
+                const showQr = qrGatewaySelected && total > 0 && !!selectedSlot && !!dateInput.value && !!upiVpa && assignedCurrency === 'INR';
+                if (!qrBox) return;
+
+                if (!showQr) {
+                    qrBox.style.display = 'none';
+                    return;
+                }
+
+                const { ref, amount, uri, qrUrl } = buildUpiData(total);
+                qrBox.style.display = 'block';
+                if (qrImage) qrImage.src = qrUrl;
+                if (qrVpa) qrVpa.textContent = upiVpa;
+                if (qrAmount) qrAmount.textContent = `INR ${amount}`;
+                if (qrRef) qrRef.textContent = ref;
+                if (upiIntentLink) upiIntentLink.href = uri;
+            }
+
+            function updateSummary() {
+                const duration = Number(durationSelect.value || 60);
+                const total = (assignedRate / 60) * duration;
+                const hasPayableAmount = total > 0;
+
+                summaryDate.textContent = dateInput.value || '-';
+                summaryTime.textContent = selectedSlot || '-';
+                summaryPrice.textContent = total > 0 ? `${assignedCurrency} ${total.toFixed(2)}` : 'FREE';
+                
+                // Enable button if date/slot/host are present, price is allowed to be 0
+                continueBtn.disabled = !(dateInput.value && selectedSlot && assignedHostId);
+                
+                if (formNote) {
+                    formNote.textContent = '';
+                }
+                updateQr(total);
+            }
+
+            function renderSlots() {
+                slotGrid.innerHTML = '';
+                selectedSlot = null;
+                slotTimes.forEach((time) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'slot-btn';
+                    btn.textContent = time;
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.slot-btn').forEach((el) => el.classList.remove('active'));
+                        btn.classList.add('active');
+                        selectedSlot = time;
+                        updateSummary();
+                    });
+                    slotGrid.appendChild(btn);
+                });
+                updateSummary();
+            }
+
+            dateInput.addEventListener('change', updateSummary);
+            durationSelect.addEventListener('change', updateSummary);
+            gatewaySelect.addEventListener('change', updateSummary);
+
+            continueBtn.addEventListener('click', () => {
+                if (!dateInput.value || !selectedSlot) return;
+                if (!isLoggedIn) {
+                    window.location.href = '/signup';
+                    return;
+                }
+                if (!assignedHostId) {
+                    if (formNote) formNote.textContent = 'Host not configured yet. Please add at least one host.';
+                    return;
+                }
+
+                if (gatewaySelect.value === 'upi_qr' || gatewaySelect.value === 'payu') {
+                    if (!upiVpa) {
+                        if (formNote) formNote.textContent = 'UPI VPA not configured. Add UPI_VPA in .env';
+                        return;
+                    }
+                    if (assignedCurrency !== 'INR') {
+                        if (formNote) formNote.textContent = 'UPI QR supports INR only in this setup.';
+                        return;
+                    }
+                }
+
+                const [hours, minutes] = selectedSlot.split(':').map(Number);
+                const start = new Date(dateInput.value + 'T00:00:00');
+                start.setHours(hours, minutes, 0, 0);
+
+                const durationMinutes = Number(durationSelect.value || 60);
+                const end = new Date(start.getTime() + durationMinutes * 60000);
+                const gateway = gatewaySelect.value || 'razorpay';
+
+                const params = new URLSearchParams({
+                    hostId: assignedHostId,
+                    startTime: start.toISOString(),
+                    endTime: end.toISOString(),
+                    gateway
+                });
+                window.location.href = `/bookings/checkout?${params.toString()}`;
+            });
+
+            renderSlots();
+            if (formNote && !assignedHostId) {
+                formNote.textContent = 'Host not configured yet. Add a host to enable checkout.';
+            } else if (formNote) {
+                formNote.textContent = '';
+            }
+        })();
+    </script>
+</section>
+
+<%- include('partials/footer') %>

@@ -1,3 +1,4 @@
+// cspell:ignore sess conv
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const Availability = require('../models/Availability');

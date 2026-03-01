@@ -1,13 +1,16 @@
+// cspell:ignore payu
 //File  :-   /routes/bookingRoutes.js
 const express = require('express');
 const router = express.Router();
 const bookingController = require('../controllers/bookingController');
 
+router.get('/', (req, res) => res.redirect('/find-host'));
 router.get('/checkout', bookingController.getBookingPage);
 
 router.post('/create-order', bookingController.createBookingOrder);
 router.post('/create-payu-order', bookingController.createPayUOrder);
 router.post('/verify-payment', bookingController.verifyPayment);
+router.post('/check-qr-status', bookingController.checkQrPaymentStatus);
 
 // ✅ Mobile redirect route — Razorpay POSTs here on mobile after payment
 router.post('/verify-payment-redirect', bookingController.verifyPaymentRedirect);
@@ -19,11 +22,10 @@ router.get('/success', bookingController.getSuccessPage);
 router.get('/payment-failed', (req, res) => {
     res.render('success', {
         title: 'Payment Failed',
-        user: req.session.user,
+        user: req.session?.user,
         failed: true,
         reason: req.query.reason || 'unknown'
     });
 });
 
 module.exports = router;
-

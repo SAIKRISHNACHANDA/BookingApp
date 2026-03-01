@@ -1,3 +1,4 @@
+<!-- cspell:ignore bento Gurubrahma -->
 <%- include('partials/header') %>
 
     <!-- Ultra Premium Hero Section (Dark Theme) -->
@@ -80,6 +81,7 @@
                 margin-bottom: 1.5rem;
                 letter-spacing: -0.02em;
                 background: linear-gradient(to bottom right, #ffffff 40%, #94a3b8 100%);
+                background-clip: text;
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
             }
@@ -314,6 +316,7 @@
                                 line-height: 1.6;
                                 margin-bottom: 1.5rem;
                                 display: -webkit-box;
+                                line-clamp: 3;
                                 -webkit-line-clamp: 3;
                                 -webkit-box-orient: vertical;
                                 overflow: hidden;
@@ -394,7 +397,7 @@
                                             <%= host.hourlyRate %>
                                     </span>
                                 </div>
-<a href="/bookings/checkout?host=<%= host._id %>" class="btn-book">Book Now</a>                            </div>
+<a href="/hosts/<%= host.username %>" class="btn-book">Book Now</a>                            </div>
                         </div>
                     </div>
                     <% }) %>
@@ -424,6 +427,7 @@
                         font-weight: 800;
                         margin-bottom: 1rem;
                         background: linear-gradient(to right, #fff, #94a3b8);
+                        background-clip: text;
                         -webkit-background-clip: text;
                         -webkit-text-fill-color: transparent;
                     }
@@ -680,7 +684,11 @@
                 </p>
                <div class="cta-btn-container">
                     <% if (typeof user !== 'undefined' && user) { %>
-                        <a href="/checkout" class="cta-btn-primary">Book a Session</a>
+                        <% if (hosts && hosts.length > 0) { %>
+                        <a href="/find-host" class="cta-btn-primary">Book a Session</a>
+                        <% } else { %>
+                        <a href="/find-host" class="cta-btn-primary">Book a Session</a>
+                        <% } %>
                         <a href="/hosts/apply" class="cta-btn-secondary">Become a Host →</a>
                     <% } else { %>
                         <a href="/signup" class="cta-btn-primary">Book a Session</a>
@@ -692,3 +700,7 @@
     </section>
 
     <%- include('partials/footer') %>
+
+
+
+

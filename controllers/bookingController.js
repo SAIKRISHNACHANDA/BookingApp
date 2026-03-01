@@ -1,3 +1,4 @@
+// cspell:ignore payu txnid udf1 surl furl productinfo firstname
 const Booking = require('../models/Booking');
 const User = require('../models/User');
 const Razorpay = require('razorpay');
@@ -22,23 +23,128 @@ function getRazorpayInstance(currency = 'INR') {
     return new Razorpay({ key_id: keyId, key_secret: keySecret });
 }
 
+exports.getBookingsHome = async (req, res) => {
+    try {
+        let defaultHost = await User.findOne({ role: 'host' })
+            .select('name bio hourlyRate currency username')
+            .sort({ createdAt: -1 });
+
+        // Fallback for quick setup: if no host exists, use latest user so checkout can proceed.
+        if (!defaultHost) {
+            defaultHost = await User.findOne({})
+                .select('name bio hourlyRate currency username')
+                .sort({ createdAt: -1 });
+        }
+
+        res.render('bookings', {
+            title: 'Bookings',
+            user: req.session?.user,
+            defaultHost,
+            upiVpa: process.env.UPI_VPA || '',
+            upiName: process.env.UPI_NAME || 'Gurubrahma'
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+};
+
+exports.createFindHostAppointment = async (req, res) => {
+    try {
+        if (!req.session?.user) {
+            return res.status(401).json({ error: 'Please log in first' });
+        }
+
+        const { hostId, date, time, duration } = req.body;
+        if (!hostId || !date || !time || !duration) {
+            return res.status(400).json({ error: 'Missing appointment details' });
+        }
+
+        const host = await User.findOne({ _id: hostId, role: 'host' });
+        if (!host) {
+            return res.status(404).json({ error: 'Host not found' });
+        }
+
+        const startTime = new Date(`${date}T${time}:00`);
+        if (Number.isNaN(startTime.getTime())) {
+            return res.status(400).json({ error: 'Invalid date/time' });
+        }
+
+        const durationMinutes = Number(duration);
+        if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+            return res.status(400).json({ error: 'Invalid duration' });
+        }
+
+        const endTime = new Date(startTime.getTime() + durationMinutes * 60000);
+        const customerUser = await User.findById(req.session.user._id).select('name email');
+        const customerName = customerUser?.name || req.session.user.name || 'Guest';
+        const customerEmail = customerUser?.email || req.session.user.email || 'guest@example.com';
+        const amount = ((host.hourlyRate || 0) / 60) * durationMinutes;
+
+        const booking = new Booking({
+            host: host._id,
+            customer: {
+                name: customerName,
+                email: customerEmail,
+                user_id: req.session.user._id
+            },
+            startTime,
+            endTime,
+            status: 'confirmed',
+            amount,
+            currency: host.currency || 'INR'
+        });
+
+        await booking.save();
+        return res.json({ success: true, bookingId: booking._id });
+    } catch (err) {
+        if (err?.code === 11000) {
+            return res.status(409).json({ error: 'This slot is already booked' });
+        }
+        console.error(err);
+        return res.status(500).json({ error: 'Server Error' });
+    }
+};
+
 exports.getBookingPage = async (req, res) => {
     try {
-        const { hostId, startTime, endTime } = req.query;
+        const { startTime, endTime } = req.query;
+        const hostId = req.query.hostId || req.query.host;
+
+        if (!hostId) {
+            return res.redirect('/');
+        }
+
         const host = await User.findById(hostId);
         if (!host) return res.status(404).send('Host not found');
 
+        const hostProfileUrl = host.username ? `/hosts/${host.username}` : '/';
+        if (!startTime || !endTime) {
+            return res.redirect(hostProfileUrl);
+        }
+
         const start = new Date(startTime);
         const end = new Date(endTime);
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || end <= start) {
+            return res.redirect(hostProfileUrl);
+        }
         const durationMinutes = (end - start) / 60000;
 
         // Fetch price and isFree from availability rule
         const { findMatchingAvailability } = require('../utils/slotUtils');
         const rule = await findMatchingAvailability(hostId, startTime);
 
-        const amount = rule ? (rule.isFree ? 0 : (rule.price || host.hourlyRate || 0)) : (host.hourlyRate || 0);
-        const amountUsd = rule ? (rule.isFree ? 0 : (rule.priceUsd || host.hourlyRateUsd || 0)) : (host.hourlyRateUsd || 0);
-        const isFree = rule ? rule.isFree : false;
+        // Calculate amount based on duration if rule price is not specified
+        const calculateFee = (baseRate, rulePrice) => {
+            if (rulePrice) return rulePrice; // If rule specifies a fixed price, use it
+            return (baseRate / 60) * durationMinutes;
+        };
+
+        const amount = rule ? (rule.isFree ? 0 : calculateFee(host.hourlyRate || 0, rule.price)) : ((host.hourlyRate || 0) / 60) * durationMinutes;
+        const amountUsd = rule ? (rule.isFree ? 0 : calculateFee(host.hourlyRateUsd || 0, rule.priceUsd)) : ((host.hourlyRateUsd || 0) / 60) * durationMinutes;
+
+        // Unified free booking check: rule said so, OR price is 0.
+        const isFree = (rule ? rule.isFree : false) || amount === 0;
 
         // Log Checkout View Analytics
         const Analytics = require('../models/Analytics');
@@ -52,7 +158,7 @@ exports.getBookingPage = async (req, res) => {
         res.render('checkout', {
             title: 'Checkout',
             host,
-            user: req.session.user,
+            user: req.session?.user,
             startTime,
             endTime,
             start: start.toLocaleString(),
@@ -94,25 +200,27 @@ exports.createBookingOrder = async (req, res) => {
 
     const { findMatchingAvailability } = require('../utils/slotUtils');
     const rule = await findMatchingAvailability(hostId, startTime);
+    const isFree = rule ? rule.isFree : false;
 
-    if (!rule) {
-        return res.status(400).json({ error: 'Could not find the price for this slot. Please try again.' });
-    }
-
-    const isFree = rule.isFree;
-
+    const durationMinutes = (end - start) / 60000;
     let amount = 0;
     let selectedCurrency = 'INR';
 
     if (!isFree) {
         if (currency === 'USD') {
-            amount = rule.priceUsd || host.hourlyRateUsd || 0;
+            const baseRate = host.hourlyRateUsd || 0;
+            amount = (rule ? rule.priceUsd : null) || (baseRate / 60) * durationMinutes;
             selectedCurrency = 'USD';
         } else {
-            amount = rule.price || host.hourlyRate || 0;
+            const baseRate = host.hourlyRate || 0;
+            amount = (rule ? rule.price : null) || (baseRate / 60) * durationMinutes;
             selectedCurrency = 'INR';
         }
     }
+    const effectiveIsFree = isFree || amount === 0;
+
+    // Set test amount to ₹1 as requested
+    amount = 1;
 
     const key_id = selectedCurrency === 'USD'
         ? (process.env.RAZORPAY_KEY_ID_USD || process.env.RAZORPAY_KEY_ID)
@@ -128,17 +236,17 @@ exports.createBookingOrder = async (req, res) => {
     }).catch(err => console.error('Analytics error:', err));
 
 
-    console.log(`[createBookingOrder] Price calculation: isFree=${isFree}, amount=${amount}, currency=${selectedCurrency}`);
+    console.log(`[createBookingOrder] Price calculation: isFree=${effectiveIsFree}, amount=${amount}, currency=${selectedCurrency}`);
 
-    if (isFree || amount === 0) {
+    if (effectiveIsFree) {
         // FREE BOOKING: Save directly as confirmed
         const booking = new Booking({
             host: hostId,
             customer: {
-                name: customerName || (req.session.user ? req.session.user.name : "Guest"),
-                email: customerEmail || (req.session.user ? req.session.user.email : "guest@example.com"),
+                name: customerName || (req.session?.user ? req.session.user.name : "Guest"),
+                email: customerEmail || (req.session?.user ? req.session.user.email : "guest@example.com"),
                 whatsapp: customerWhatsapp || "",
-                user_id: req.session.user ? req.session.user._id : null
+                user_id: req.session?.user ? req.session.user._id : null
             },
             startTime: start,
             endTime: end,
@@ -180,8 +288,64 @@ exports.createBookingOrder = async (req, res) => {
 
     console.log(`[createBookingOrder] Razorpay options:`, options);
 
+    const { paymentMethod } = req.body;
+
     try {
         const instance = getRazorpayInstance(selectedCurrency);
+
+        // --- QR CODE FLOW ---
+        if (paymentMethod === 'qr_code') {
+            console.log(`[createBookingOrder] Creating Razorpay QR Code for amount: ${amount}`);
+
+            // Note: QR Code API expects amount in smallest unit (paisa)
+            const qrOptions = {
+                type: 'upi_qr',
+                name: "Booking Payment",
+                usage: 'single_use',
+                fixed_amount: true,
+                payment_amount: Math.round(amount * 100),
+                description: `Booking for ${customerName} with ${host.name}`,
+                notes: {
+                    hostId: hostId.toString(),
+                    customerEmail: customerEmail
+                }
+            };
+
+            const qrCode = await instance.qrCode.create(qrOptions);
+            console.log(`[createBookingOrder] QR Code created: ${qrCode.id}`);
+
+            const booking = new Booking({
+                host: hostId,
+                customer: {
+                    name: customerName || (req.session?.user ? req.session.user.name : "Guest"),
+                    email: customerEmail || (req.session?.user ? req.session.user.email : "guest@example.com"),
+                    whatsapp: customerWhatsapp || "",
+                    user_id: req.session?.user ? req.session.user._id : null
+                },
+                startTime: start,
+                endTime: end,
+                status: 'locked',
+                amount: amount,
+                currency: selectedCurrency,
+                razorpayQrId: qrCode.id,
+                razorpayQrData: qrCode.image_url, // image_url contains the QR data image
+                paymentMethod: 'qr_code'
+            });
+            await booking.save();
+
+            return res.json({
+                success: true,
+                isFree: false,
+                qrCode: {
+                    id: qrCode.id,
+                    image_url: qrCode.image_url,
+                    payment_data: qrCode.payment_data // UPI intent URL
+                },
+                bookingId: booking._id
+            });
+        }
+
+        // --- STANDARD CHECKOUT FLOW ---
         const order = await instance.orders.create(options);
         console.log(`[createBookingOrder] Razorpay order created: ${order.id}`);
 
@@ -189,17 +353,18 @@ exports.createBookingOrder = async (req, res) => {
         const booking = new Booking({
             host: hostId,
             customer: {
-                name: customerName || (req.session.user ? req.session.user.name : "Guest"),
-                email: customerEmail || (req.session.user ? req.session.user.email : "guest@example.com"),
+                name: customerName || (req.session?.user ? req.session.user.name : "Guest"),
+                email: customerEmail || (req.session?.user ? req.session.user.email : "guest@example.com"),
                 whatsapp: customerWhatsapp || "",
-                user_id: req.session.user ? req.session.user._id : null
+                user_id: req.session?.user ? req.session.user._id : null
             },
             startTime: start,
             endTime: end,
             status: 'locked',
             amount: amount,
             currency: selectedCurrency,
-            razorpayOrderId: order.id
+            razorpayOrderId: order.id,
+            paymentMethod: 'checkout'
         });
         await booking.save();
         console.log(`[createBookingOrder] Booking saved: ${booking._id}`);
@@ -359,13 +524,12 @@ exports.createPayUOrder = async (req, res) => {
 
     const { findMatchingAvailability } = require('../utils/slotUtils');
     const rule = await findMatchingAvailability(hostId, startTime);
-    if (!rule) return res.status(400).json({ error: 'Slot validation failed' });
 
     let amount = 0;
     if (currency === 'USD') {
-        amount = rule.priceUsd || host.hourlyRateUsd || 0;
+        amount = (rule ? rule.priceUsd : null) || host.hourlyRateUsd || 0;
     } else {
-        amount = rule.price || host.hourlyRate || 0;
+        amount = (rule ? rule.price : null) || host.hourlyRate || 0;
     }
 
     const txnid = 'txn_' + Date.now();
@@ -385,8 +549,8 @@ exports.createPayUOrder = async (req, res) => {
 
     const payuUtils = require('../utils/payuUtils');
     const productinfo = 'Session Booking';
-    const firstname = customerName ? customerName.split(' ')[0] : (req.session.user ? req.session.user.name.split(' ')[0] : 'Guest');
-    const email = customerEmail || (req.session.user ? req.session.user.email : 'guest@example.com');
+    const firstname = customerName ? customerName.split(' ')[0] : (req.session?.user ? req.session.user.name.split(' ')[0] : 'Guest');
+    const email = customerEmail || (req.session?.user ? req.session.user.email : 'guest@example.com');
     const phone = customerWhatsapp || '9999999999';
 
     // Hash Sequence: key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||salt
@@ -406,10 +570,10 @@ exports.createPayUOrder = async (req, res) => {
     const booking = new Booking({
         host: hostId,
         customer: {
-            name: customerName || (req.session.user ? req.session.user.name : "Guest"),
-            email: customerEmail || (req.session.user ? req.session.user.email : "guest@example.com"),
+            name: customerName || (req.session?.user ? req.session.user.name : "Guest"),
+            email: customerEmail || (req.session?.user ? req.session.user.email : "guest@example.com"),
             whatsapp: customerWhatsapp || "",
-            user_id: req.session.user ? req.session.user._id : null
+            user_id: req.session?.user ? req.session.user._id : null
         },
         startTime: start,
         endTime: end,
@@ -492,6 +656,54 @@ exports.payuResponse = async (req, res) => {
     }
 };
 
+exports.checkQrPaymentStatus = async (req, res) => {
+    const { bookingId } = req.body;
+    try {
+        const booking = await Booking.findById(bookingId).populate('host');
+        if (!booking) return res.status(404).json({ error: 'Booking not found' });
+
+        if (booking.status === 'confirmed') {
+            return res.json({ success: true, status: 'confirmed' });
+        }
+
+        if (!booking.razorpayQrId) {
+            return res.status(400).json({ error: 'No QR code found for this booking' });
+        }
+
+        const instance = getRazorpayInstance(booking.currency);
+        const qrCode = await instance.qrCode.fetch(booking.razorpayQrId);
+
+        console.log(`[checkQrPaymentStatus] QR Code status for ${booking.razorpayQrId}: ${qrCode.status}, payments_received: ${qrCode.payments_received}`);
+
+        // If at least one payment is received, mark as confirmed
+        if (qrCode.payments_received > 0) {
+            booking.status = 'confirmed';
+            await booking.save();
+
+            // Trigger post-payment logic (Meet link, email, analytics)
+            const { createMeetEvent } = require('../services/googleCalendarService');
+            await createMeetEvent(booking);
+
+            const { sendBookingConfirmation } = require('../utils/emailService');
+            sendBookingConfirmation(booking).catch(console.error);
+
+            const Analytics = require('../models/Analytics');
+            await Analytics.create({
+                host: booking.host._id,
+                event: 'payment_success',
+                metadata: { bookingId: booking._id, amount: booking.amount, via: 'qr_code' }
+            }).catch(console.error);
+
+            return res.json({ success: true, status: 'confirmed' });
+        }
+
+        return res.json({ success: false, status: 'pending' });
+    } catch (err) {
+        console.error('[checkQrPaymentStatus] Error:', err);
+        res.status(500).json({ error: 'Failed to check QR status' });
+    }
+};
+
 exports.getSuccessPage = (req, res) => {
-    res.render('success', { title: 'Booking Confirmed', user: req.session.user });
+    res.render('success', { title: 'Booking Confirmed', user: req.session?.user });
 };

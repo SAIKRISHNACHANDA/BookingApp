@@ -32,7 +32,14 @@ const bookingSchema = new mongoose.Schema({
     currency: String,
     razorpayOrderId: String,
     razorpayPaymentId: String,
+    razorpayQrId: String,
+    razorpayQrData: String, // Store UPI URI for QR code
     payuTxnId: String,
+    paymentMethod: {
+        type: String,
+        enum: ['checkout', 'qr_code'],
+        default: 'checkout'
+    },
     paymentGateway: {
         type: String,
         enum: ['razorpay', 'payu'],

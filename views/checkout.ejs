@@ -423,12 +423,21 @@
                         </div>
 
                         <div class="gateway-row">
-                            <div class="gateway-box active" onclick="selectGateway('razorpay')">
-                                <input type="radio" id="razorpay" name="gateway" value="razorpay" checked>
+                            <div class="gateway-box" onclick="selectGateway('razorpay')">
+                                <input type="radio" id="razorpay" name="gateway" value="razorpay">
                                 <div class="gateway-text-container">
                                     <label for="razorpay"
                                         style="font-weight: 600; color:#1e293b; display:block; cursor:pointer;">Razorpay</label>
                                     <span style="font-size:0.8rem; color:#64748b;">UPI, Cards & NetBanking</span>
+                                </div>
+                            </div>
+                            <div class="gateway-box active" onclick="selectGateway('razorpay_qr')">
+                                <input type="radio" id="razorpay_qr" name="gateway" value="razorpay_qr" checked>
+                                <div class="gateway-text-container">
+                                    <label for="razorpay_qr"
+                                        style="font-weight: 600; color:#1e293b; display:block; cursor:pointer;">Razorpay
+                                        QR Code</label>
+                                    <span style="font-size:0.8rem; color:#64748b;">Scan & Pay with any UPI App</span>
                                 </div>
                             </div>
                             <div class="gateway-box" onclick="selectGateway('payu')">
@@ -443,7 +452,7 @@
                         <% } %>
 
                             <div style="margin-top: auto; padding-top: 1rem;">
-                                <button id="rzp-button1" class="btn-pay" style="margin-top: 0;">
+                                <button id="rzp-button1" type="button" class="btn-pay" style="margin-top: 0;">
                                     <span>Confirm & Pay</span>
                                 </button>
 
@@ -488,16 +497,21 @@
 
         function selectCurrency(currency) {
             selectedCurrency = currency;
-            document.querySelectorAll('.currency-card').forEach(el => el.classList.remove('selected-currency'));
-            document.getElementById('card-' + currency).classList.add('selected-currency');
+            document.querySelectorAll('.select-card').forEach(el => el.classList.remove('active'));
+            const card = document.getElementById('card-' + currency);
+            if (card) card.classList.add('active');
         }
 
         function selectGateway(gateway) {
-            document.querySelectorAll('input[name="gateway"]').forEach(el => el.checked = false);
-            document.getElementById(gateway).checked = true;
+            const radio = document.getElementById(gateway);
+            if (!radio) return;
 
-            document.querySelectorAll('.gateway-option').forEach(el => el.classList.remove('selected'));
-            document.getElementById(gateway).closest('.gateway-option').classList.add('selected');
+            document.querySelectorAll('input[name="gateway"]').forEach(el => el.checked = false);
+            radio.checked = true;
+
+            document.querySelectorAll('.gateway-box').forEach(el => el.classList.remove('active'));
+            const gatewayBox = radio.closest('.gateway-box');
+            if (gatewayBox) gatewayBox.classList.add('active');
 
             updateButtonText();
         }
@@ -505,34 +519,66 @@
         function updateButtonText() {
             const gateway = document.querySelector('input[name="gateway"]:checked')?.value;
             const btn = document.getElementById('rzp-button1');
-            const isFreeStr = "<%= isFree %>"; // Get isFree from server render
-            const isFreeBooking = isFreeStr === "true";
+            if (!btn) return;
+
+            // Use locals to avoid reference error if isFree is missing, fallback to JS value
+            const isFreeBooking = <%= !!locals.isFree %>;
 
             if (isFreeBooking) {
-                btn.innerText = 'Confirm Booking';
+                btn.innerHTML = '<span>Confirm Booking</span>';
                 return;
             }
 
             if (gateway === 'payu') {
-                btn.innerText = 'Pay with PayU';
+                btn.innerHTML = '<span>Pay with PayU</span>';
+            } else if (gateway === 'razorpay_qr') {
+                btn.innerHTML = '<span>Continue & Pay</span>';
             } else {
-                btn.innerText = 'Pay & Book';
+                btn.innerHTML = '<span>Pay & Book</span>';
             }
         }
 
         function resetButton(btn, text) {
-            btn.innerText = text;
+            if (!btn) return;
+            btn.innerHTML = `<span>${text}</span>`;
             btn.disabled = false;
             btn.style.opacity = '1';
             btn.style.cursor = 'pointer';
         }
 
+        let qrCheckInterval = null;
+
+        async function checkPaymentStatus(bookingId) {
+            try {
+                const res = await fetch('/bookings/check-qr-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingId })
+                });
+                const data = await res.json();
+                if (data.success && data.status === 'confirmed') {
+                    showToast('Payment Received! Redirecting...', 'success');
+                    clearInterval(qrCheckInterval);
+                    setTimeout(() => {
+                        window.location.href = '/bookings/success';
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('Status check failed:', err);
+            }
+        }
+
         document.getElementById('rzp-button1').onclick = async function (e) {
-            e.preventDefault();
+            console.log('[Checkout] Confirm button clicked');
+            if (e && typeof e.preventDefault === 'function') {
+                e.preventDefault();
+            }
 
             const nameInp = document.getElementById('customerName');
             const emailInp = document.getElementById('customerEmail');
             const whatsappInp = document.getElementById('customerWhatsapp');
+
+            if (!nameInp || !emailInp || !whatsappInp) return;
 
             const name = nameInp.value.trim();
             const email = emailInp.value.trim();
@@ -541,14 +587,8 @@
             const inputs = [nameInp, emailInp, whatsappInp];
             inputs.forEach(el => el.classList.remove('input-error'));
 
-            // clear on input change as well
-            inputs.forEach(el => {
-                el.addEventListener('input', () => el.classList.remove('input-error'), { once: true });
-            });
-
             if (!name || !email || !whatsapp) {
                 let firstEmpty = null;
-                // Reverse order so firstEmpty ends up being the top-most unfilled field
                 [whatsappInp, emailInp, nameInp].forEach(el => {
                     if (!el.value.trim()) {
                         el.classList.add('input-error');
@@ -557,10 +597,7 @@
                 });
 
                 showToast('Please fill in all details (Name, Email, WhatsApp)', 'error');
-
-                if (firstEmpty) {
-                    firstEmpty.focus();
-                }
+                if (firstEmpty) firstEmpty.focus();
                 return;
             }
 
@@ -568,7 +605,7 @@
             const originalText = btn.innerText;
             const gateway = document.querySelector('input[name="gateway"]:checked')?.value || 'razorpay';
 
-            btn.innerText = 'Processing...';
+            btn.innerHTML = '<span>Processing...</span>';
             btn.disabled = true;
             btn.style.opacity = '0.7';
             btn.style.cursor = 'wait';
@@ -580,7 +617,8 @@
                 currency: selectedCurrency,
                 customerName: name,
                 customerEmail: email,
-                customerWhatsapp: whatsapp
+                customerWhatsapp: whatsapp,
+                paymentMethod: gateway === 'razorpay_qr' ? 'qr_code' : 'checkout'
             };
 
             try {
@@ -593,7 +631,6 @@
                     });
 
                     const data = await res.json();
-
                     if (data.error) {
                         showToast(data.error, 'error');
                         resetButton(btn, originalText);
@@ -601,7 +638,6 @@
                     }
 
                     if (data.success && data.action) {
-                        // Create hidden form and submit
                         const form = document.createElement('form');
                         form.method = 'POST';
                         form.action = data.action;
@@ -617,11 +653,10 @@
                         document.body.appendChild(form);
                         showToast('Redirecting to PayU...', 'success');
                         form.submit();
-                        return; // Done
+                        return;
                     }
-
-                } else {
-                    // --- RAZORPAY / FREE FLOW ---
+                } else if (gateway === 'razorpay_qr') {
+                    // --- RAZORPAY QR FLOW ---
                     const res = await fetch('/bookings/create-order', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -629,7 +664,71 @@
                     });
 
                     const data = await res.json();
+                    if (data.error) {
+                        showToast(data.error, 'error');
+                        resetButton(btn, originalText);
+                        return;
+                    }
 
+                    if (data.success && data.qrCode) {
+                        // Show QR Code overlay
+                        const overlay = document.createElement('div');
+                        overlay.style.position = 'fixed';
+                        overlay.style.top = '0';
+                        overlay.style.left = '0';
+                        overlay.style.width = '100%';
+                        overlay.style.height = '100%';
+                        overlay.style.background = 'rgba(0,0,0,0.8)';
+                        overlay.style.zIndex = '10000';
+                        overlay.style.display = 'flex';
+                        overlay.style.alignItems = 'center';
+                        overlay.style.justifyContent = 'center';
+                        overlay.style.padding = '1rem';
+
+                        overlay.innerHTML = `
+                            <div style="background: white; padding: 2.5rem; border-radius: 20px; text-align: center; max-width: 400px; width: 100%;">
+                                <h3 style="margin-bottom: 1rem; color: #1e293b;">Scan to Pay</h3>
+                                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem;">Scan this QR code using any UPI app (PhonePe, GPay, Paytm) to complete payment.</p>
+                                <img src="${data.qrCode.image_url}" alt="QR Code" style="width: 250px; height: 250px; margin-bottom: 1.5rem; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px;">
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <button id="verify-qr-btn" class="btn-pay" style="margin-top: 0; padding: 0.8rem;">
+                                        Check Payment Status
+                                    </button>
+                                    <button id="close-qr-btn" style="background: none; border: none; color: #64748b; font-size: 0.9rem; cursor: pointer; padding: 5px;">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(overlay);
+
+                        document.getElementById('close-qr-btn').onclick = () => {
+                            document.body.removeChild(overlay);
+                            clearInterval(qrCheckInterval);
+                            resetButton(btn, originalText);
+                        };
+
+                        document.getElementById('verify-qr-btn').onclick = () => {
+                            checkPaymentStatus(data.bookingId);
+                        };
+
+                        // Auto-poll status every 5 seconds
+                        qrCheckInterval = setInterval(() => {
+                            checkPaymentStatus(data.bookingId);
+                        }, 5000);
+
+                        return;
+                    }
+
+                } else {
+                    // --- RAZORPAY STANDARD FLOW ---
+                    const res = await fetch('/bookings/create-order', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await res.json();
                     if (data.error) {
                         showToast(data.error, 'error');
                         resetButton(btn, originalText);
@@ -644,7 +743,7 @@
                         return;
                     }
 
-                    var options = {
+                    const options = {
                         "key": data.key_id,
                         "amount": data.order.amount,
                         "currency": data.order.currency,
@@ -666,16 +765,26 @@
                             }
                         }
                     };
-                    var rzp1 = new Razorpay(options);
+                    const rzp1 = new Razorpay(options);
                     rzp1.open();
                 }
-
             } catch (err) {
                 console.error(err);
                 showToast('An unexpected error occurred. Please try again.', 'error');
                 resetButton(btn, originalText);
             }
-        }
+        };
+
+        // Initialize gateway from URL query: /bookings/checkout?...&gateway=payu
+        (function initGatewayFromQuery() {
+            const params = new URLSearchParams(window.location.search);
+            const gateway = params.get('gateway');
+            if (gateway === 'payu' || gateway === 'razorpay' || gateway === 'razorpay_qr') {
+                selectGateway(gateway);
+            } else {
+                updateButtonText();
+            }
+        })();
     </script>
 
     <%- include('partials/footer') %>

@@ -21,7 +21,6 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/bookings', require('./routes/bookingRoutes'));
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
@@ -48,10 +47,13 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/booking_a
 const authRoutes = require('./routes/authRoutes');
 const hostRoutes = require('./routes/hostRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
+const bookingController = require('./controllers/bookingController');
 const adminRoutes = require('./routes/adminRoutes');
 
 app.use('/', authRoutes);
 app.use('/hosts', hostRoutes);
+app.get('/find-host', bookingController.getBookingsHome);
+app.post('/find-host/book', bookingController.createFindHostAppointment);
 app.use('/bookings', bookingRoutes);
 app.use('/admin', adminRoutes);
 
@@ -60,7 +62,7 @@ const User = require('./models/User');
 app.get('/', async (req, res) => {
     try {
         const hosts = await User.find({ role: 'host' }).select('name email hourlyRate currency username');
-        res.render('index', { title: 'Welcome', user: req.session.user, hosts });
+        res.render('index', { title: 'Welcome', user: req.session?.user, hosts });
     } catch (err) {
         console.error(err);
         res.status(500).send(`Server Error: ${err.message}`);
