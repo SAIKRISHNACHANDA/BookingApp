@@ -651,8 +651,36 @@
                         "name": "Gurubrahma",
                         "description": "Session Booking",
                         "order_id": data.order.id,
-                        "redirect": true,
-                        "callback_url": window.location.origin + "/bookings/verify-payment-redirect?booking_id=" + data.bookingId,
+                        "handler": async function (response) {
+                            btn.innerText = 'Verifying...';
+                            try {
+                                const verifyRes = await fetch('/bookings/verify-payment', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_signature: response.razorpay_signature,
+                                        booking_id: data.bookingId
+                                    })
+                                });
+
+                                const verifyData = await verifyRes.json();
+                                if (verifyData.success) {
+                                    showToast('Payment Successful! Redirecting...', 'success');
+                                    setTimeout(() => {
+                                        window.location.href = '/bookings/success';
+                                    }, 1000);
+                                } else {
+                                    showToast('Payment verification failed', 'error');
+                                    resetButton(btn, originalText);
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                showToast('Verification error', 'error');
+                                resetButton(btn, originalText);
+                            }
+                        },
                         "prefill": {
                             "name": name,
                             "email": email,

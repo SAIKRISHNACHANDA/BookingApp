@@ -217,7 +217,7 @@ exports.verifyPayment = async (req, res) => {
     // Fetch booking to know the currency/secret
     const booking = await Booking.findById(booking_id).populate('host');
     if (!booking) {
-        return res.status(404).send('Booking not found');
+        return res.status(404).json({ success: false, error: 'Booking not found' });
     }
 
     // Select Secret based on Currency
@@ -257,7 +257,7 @@ exports.verifyPayment = async (req, res) => {
 
         return res.status(200).json({ success: true });
     } else {
-        return res.status(400).send('Payment Verification Failed');
+        return res.status(400).json({ success: false, error: 'Payment Verification Failed' });
     }
 };
 
