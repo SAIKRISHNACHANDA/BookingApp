@@ -5,6 +5,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 const session = require('express-session');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 // Load env FIRST before any module that reads process.env
 dotenv.config();
@@ -15,16 +17,42 @@ const passport = require('./config/passport');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Security & Trust Proxy (Needed for Cloudflare/AWS)
+app.set('trust proxy', 1);
+
+app.use(helmet({
+    contentSecurityPolicy: false // Disabled to prevent blocking Google Login and Razorpay UI
+}));
+
+// Apply Rate Limiting
+const limiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 100, // limit each IP to 100 requests per minute
+    message: "Too many requests from this IP, please try again later."
+});
+app.use(limiter);
+
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
+const { MongoStore } = require('connect-mongo');
+
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secret',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/booking_app',
+        collectionName: 'sessions',
+        ttl: 14 * 24 * 60 * 60 // 14 days
+    }),
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 14 // 14 days
+    }
 }));
+
 
 // Passport middleware
 app.use(passport.initialize());
@@ -52,6 +80,10 @@ app.use('/', authRoutes);
 app.use('/hosts', hostRoutes);
 app.use('/bookings', bookingRoutes);
 app.use('/admin', adminRoutes);
+
+app.get('/privacy', (req, res) => res.render('privacy', { title: 'Privacy Policy', user: req.session?.user }));
+app.get('/terms', (req, res) => res.render('terms', { title: 'Terms & Conditions', user: req.session?.user }));
+app.get('/refund', (req, res) => res.render('refund', { title: 'Refund Policy', user: req.session?.user }));
 
 const User = require('./models/User');
 

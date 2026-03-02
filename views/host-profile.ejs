@@ -368,10 +368,8 @@
             }
 
             #bookingSummary {
-                width: calc(100% - 2rem) !important;
-                right: 1rem !important;
-                bottom: 1rem !important;
-                left: 1rem !important;
+                width: 90vw !important;
+                max-width: 400px;
             }
         }
     </style>
@@ -672,6 +670,21 @@
                 }
             } catch (err) {
                 slotsList.innerHTML = '<p class="text-light">Failed to load slots.</p>';
+            }
+
+            // Auto-scroll to slots on mobile views after loading is complete
+            if (window.innerWidth <= 768) {
+                setTimeout(() => {
+                    const slotsEl = document.getElementById('slotsContainer');
+                    const headerOffset = 90; // Spacing for your sticky nav pill
+                    const elementPosition = slotsEl.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
+                }, 50);
             }
         }
 
